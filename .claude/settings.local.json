@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(node -e ':*)",
+      "Bash(node gateway/server.js)",
+      "Bash(curl -s http://localhost:3000/health)",
+      "Bash(node scripts/demo.js)"
+    ]
+  }
+}

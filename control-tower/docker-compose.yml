@@ -1,0 +1,122 @@
+version: '3.9'
+
+services:
+  # ─── Infrastructure ────────────────────────────────────���─────
+  mongodb:
+    image: mongo:7.0
+    container_name: aion_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: aion_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: aion_zookeeper
+    profiles: ["kafka"]
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: aion_kafka
+    profiles: ["kafka"]
+    depends_on: [zookeeper]
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ─── Python AI Services ───────────────────────────────────────
+  anomaly_service:
+    build:
+      context: ./services/ai-services/anomaly_service
+      dockerfile: Dockerfile
+    container_name: aion_anomaly
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  forecasting_service:
+    build:
+      context: ./services/ai-services/forecasting_service
+      dockerfile: Dockerfile
+    container_name: aion_forecasting
+    ports:
+      - "8002:8002"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  maintenance_service:
+    build:
+      context: ./services/ai-services/maintenance_service
+      dockerfile: Dockerfile
+    container_name: aion_maintenance
+    ports:
+      - "8003:8003"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Node.js Gateway ─────────────────────────────────────────
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aion_gateway
+    ports:
+      - "3000:3000"
+    environment:
+      MONGO_URI:             mongodb://mongodb:27017/aion_control_tower
+      REDIS_HOST:            redis
+      ANOMALY_SERVICE_URL:   http://anomaly_service:8001
+      FORECASTING_SERVICE_URL: http://forecasting_service:8002
+      MAINTENANCE_SERVICE_URL: http://maintenance_service:8003
+    depends_on:
+      mongodb:   { condition: service_healthy }
+      redis:     { condition: service_healthy }
+      anomaly_service:    { condition: service_healthy }
+      forecasting_service:{ condition: service_healthy }
+      maintenance_service:{ condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongo_data:
