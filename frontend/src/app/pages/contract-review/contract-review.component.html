@@ -1,0 +1,50 @@
+<section class="page-head">
+  <div>
+    <h1>Contract Review</h1>
+    <p>Review contract shortfalls, treatment basis, and recommended revenue action.</p>
+  </div>
+</section>
+
+<section class="layout">
+  <div class="main-col">
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="label">Recognized Revenue</div>
+        <div class="value">{{ getValue('recognized_revenue_usd') }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Shortfall Volume</div>
+        <div class="value">{{ getValue('shortfall_volume_cuft') }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Risk Level</div>
+        <div class="value">{{ getValue('risk_level') }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Rule Applied</div>
+        <div class="value small">{{ getValue('rule_or_clause_used') }}</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">Volume Comparison</div>
+      <div class="chart-wrap">
+        <canvas #contractChart></canvas>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">Summary</div>
+      <p>{{ response()?.narrative || 'Loading contract review...' }}</p>
+    </section>
+  </div>
+
+  <div class="side-col">
+    <app-usecase-chat
+      [module]="'revenue_recognition'"
+      [userRole]="'revenue_accountant'"
+      [contractId]="'TOP-SAMSUNG-001'"
+      [customer]="'Samsung'"
+    ></app-usecase-chat>
+  </div>
+</section>

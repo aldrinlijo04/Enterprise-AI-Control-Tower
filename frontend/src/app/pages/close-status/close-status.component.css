@@ -1,0 +1,72 @@
+.page-head,
+.card,
+.kpi-card {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.page-head h1 {
+  margin: 0 0 8px;
+  color: #fff;
+}
+
+.page-head p {
+  margin: 0;
+  color: #94a7b9;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.main-col,
+.side-col {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.label {
+  color: #8da0b2;
+  font-size: 12px;
+}
+
+.value {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.section-title {
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.card p {
+  color: #eaf1f7;
+  line-height: 1.7;
+}
+
+@media (max-width: 1000px) {
+  .layout,
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.chart-wrap {
+  position: relative;
+  height: 320px;
+}

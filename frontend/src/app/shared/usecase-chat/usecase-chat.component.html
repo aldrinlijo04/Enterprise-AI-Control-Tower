@@ -1,0 +1,18 @@
+<div class="chat-card">
+  <div class="chat-head">
+    <div class="title">Quick Ask</div>
+    <div class="status">{{ loading() ? 'Working...' : 'Ready' }}</div>
+  </div>
+
+  <div class="chat-stream">
+    <div class="msg" *ngFor="let msg of messages()" [class.user]="msg.role === 'user'">
+      <div class="msg-role">{{ msg.role === 'user' ? 'You' : 'AI' }}</div>
+      <div class="msg-text">{{ msg.text }}</div>
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <textarea [(ngModel)]="userInput" rows="2" placeholder="Ask about this use case..."></textarea>
+    <button (click)="sendMessage()" [disabled]="loading() || !userInput.trim()">Send</button>
+  </div>
+</div>

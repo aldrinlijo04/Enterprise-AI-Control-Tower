@@ -1,0 +1,50 @@
+<section class="page-head">
+  <div>
+    <h1>Capital Decision</h1>
+    <p>Evaluate scenario outcomes, investment quality, and leadership recommendation.</p>
+  </div>
+</section>
+
+<section class="layout">
+  <div class="main-col">
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="label">IRR</div>
+        <div class="value">{{ getValue('irr_pct') }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">NPV</div>
+        <div class="value">{{ getValue('npv_usd') }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Cash Proxy</div>
+        <div class="value">{{ getValue('annual_cashflow_proxy_usd') }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Recommendation</div>
+        <div class="value small">{{ getValue('recommendation') }}</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">Scenario View</div>
+      <div class="chart-wrap">
+        <canvas #capitalChart></canvas>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">Summary</div>
+      <p>{{ response()?.narrative || 'Loading capital recommendation...' }}</p>
+    </section>
+  </div>
+
+  <div class="side-col">
+    <app-usecase-chat
+      [module]="'capital_allocation'"
+      [userRole]="'cfo'"
+      [projectId]="'NEOM Phase 2'"
+      [scenario]="scenario"
+    ></app-usecase-chat>
+  </div>
+</section>

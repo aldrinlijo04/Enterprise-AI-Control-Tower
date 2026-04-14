@@ -1,0 +1,74 @@
+.hero,
+.stat,
+.module-card {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.hero h1 {
+  margin: 0 0 8px;
+  color: #fff;
+}
+
+.hero p {
+  margin: 0;
+  color: #94a7b9;
+}
+
+.stats,
+.module-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.label {
+  color: #8da0b2;
+  font-size: 12px;
+}
+
+.value {
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.module-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.module-card {
+  text-decoration: none;
+  color: inherit;
+}
+
+.title {
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.text {
+  color: #94a7b9;
+  line-height: 1.6;
+}
+
+.cta {
+  margin-top: 12px;
+  color: #7fb7ff;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .stats,
+  .module-grid {
+    grid-template-columns: 1fr;
+  }
+}

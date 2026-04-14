@@ -1,0 +1,21 @@
+<section class="hero">
+  <div>
+    <h1>Finance decision platform</h1>
+    <p>Use dedicated workspaces for close status, contract treatment, project estimate, and capital planning.</p>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="stat" *ngFor="let item of cards()">
+    <div class="label">{{ item.label }}</div>
+    <div class="value">{{ item.value }}</div>
+  </div>
+</section>
+
+<section class="module-grid">
+  <a class="module-card" *ngFor="let item of modules" [routerLink]="item.route">
+    <div class="title">{{ item.title }}</div>
+    <div class="text">{{ item.text }}</div>
+    <div class="cta">Open</div>
+  </a>
+</section>

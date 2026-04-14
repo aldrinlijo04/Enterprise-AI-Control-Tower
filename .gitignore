@@ -1,0 +1,69 @@
+# =========================
+# 🔐 ENV & SECRETS
+# =========================
+.env
+.env.*
+*.env
+.history/
+
+# =========================
+# 🐍 PYTHON BACKEND
+# =========================
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+
+# FastAPI / runtime
+*.jsonl
+runtime_audit_log.jsonl
+
+# =========================
+# 📦 NODE / ANGULAR FRONTEND
+# =========================
+node_modules/
+dist/
+.angular/
+.tmp/
+out-tsc/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# 🧠 OS FILES
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# 🧑‍💻 IDE FILES
+# =========================
+.vscode/
+.idea/
+*.swp
+
+# =========================
+# 🗂️ BUILD / CACHE
+# =========================
+.cache/
+coverage/
+
+# =========================
+# 📁 OPTIONAL LARGE FILES
+# =========================
+*.zip
+*.tar
+*.gz
+
+# =========================
+# 🔥 DATA FILES (OPTIONAL)
+# =========================
+shared_finance_agents_database.json

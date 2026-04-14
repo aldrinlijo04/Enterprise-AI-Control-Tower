@@ -1,0 +1,49 @@
+<section class="page-head">
+  <div>
+    <h1>Close Status</h1>
+    <p>Monitor close readiness, review workload, and exception pressure.</p>
+  </div>
+</section>
+
+<section class="layout">
+  <div class="main-col">
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="label">Review Candidates</div>
+        <div class="value">{{ getMetric('manual_review_candidates') }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Auto Post</div>
+        <div class="value">{{ getMetric('auto_post_candidates') }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Flagged</div>
+        <div class="value">{{ getMetric('flagged_count') }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Open Items</div>
+        <div class="value">{{ getMetric('open_count') }}</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">Close Mix</div>
+      <div class="chart-wrap">
+        <canvas #closeChart></canvas>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">Summary</div>
+      <p>{{ response()?.narrative || 'Loading close summary...' }}</p>
+    </section>
+  </div>
+
+  <div class="side-col">
+    <app-usecase-chat
+      [module]="'financial_close'"
+      [userRole]="'controller'"
+      [entity]="'AirProd Malaysia'"
+    ></app-usecase-chat>
+  </div>
+</section>
