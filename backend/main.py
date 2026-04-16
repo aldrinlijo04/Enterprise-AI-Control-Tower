@@ -20,12 +20,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
-from pydantic import BaseModel
-from typing import Optional, List
+from pydantic import BaseModel, Field
+from typing import List
 from pathlib import Path
 
 from models.ai_models import PlantAIEngine
 from services.chat_service import ask
+from services.agent_service import list_agents, get_agent_health, run_agent, orchestrate_agents
 
 load_dotenv()
 
@@ -76,11 +77,30 @@ if FRONTEND_DIR.exists():
 
 class ChatRequest(BaseModel):
     message: str
-    history: Optional[List[dict]] = []
+    history: List[dict] = Field(default_factory=list)
 
 
 class AudioRequest(BaseModel):
     audio_b64: str  # base64 encoded audio
+
+
+class AgentAskRequest(BaseModel):
+    query: str
+    history: List[dict] = Field(default_factory=list)
+    include_internal: bool = True
+
+
+class AgentAnalyzeRequest(BaseModel):
+    query: str = ""
+    include_internal: bool = True
+
+
+class AgentOrchestrateRequest(BaseModel):
+    query: str = ""
+    history: List[dict] = Field(default_factory=list)
+    agent_ids: List[str] = Field(default_factory=list)
+    include_internal: bool = True
+    mode: str = "ask"
 
 
 # ── root ────────────────────────────────────────────────────
@@ -148,8 +168,8 @@ def get_anomalies():
 def get_maintenance():
     result = engine.maintenance.predict(engine.ot_df)
     df = engine.ot_df.copy().tail(20)
-    df["rul_hours"] = result["rul_hours"][:20]
-    df["risk_level"] = result["risk_level"][:20]
+    df["rul_hours"] = result["rul_hours"][-20:]
+    df["risk_level"] = result["risk_level"][-20:]
     df["timestamp"] = df["timestamp"].astype(str)
     return df[["timestamp", "equipment_id", "plant_id", "rul_hours", "risk_level"]].to_dict("records")
 
@@ -158,9 +178,9 @@ def get_maintenance():
 def get_failure():
     result = engine.failure.predict(engine.ot_df)
     df = engine.ot_df.copy().tail(20)
-    df["failure_label"] = result["failure_labels"][:20]
-    df["failure_prob"] = result["failure_prob"][:20]
-    df["failure_horizon"] = result["failure_horizon"][:20]
+    df["failure_label"] = result["failure_labels"][-20:]
+    df["failure_prob"] = result["failure_prob"][-20:]
+    df["failure_horizon"] = result["failure_horizon"][-20:]
     df["timestamp"] = df["timestamp"].astype(str)
     return df[["timestamp", "equipment_id", "plant_id",
                "failure_label", "failure_prob", "failure_horizon"]].to_dict("records")
@@ -174,6 +194,75 @@ def chat(req: ChatRequest):
     report = engine.full_report()
     reply = ask(req.message, snapshot, report, req.history)
     return {"reply": reply}
+
+
+# ── multi-agent routes ──────────────────────────────────────
+
+@app.get("/api/agents")
+def get_available_agents():
+    return {"agents": list_agents()}
+
+
+@app.post("/api/agents/orchestrate")
+def orchestrate_all_agents(req: AgentOrchestrateRequest):
+    snapshot = engine.latest_snapshot()
+    report = engine.full_report()
+    try:
+        return orchestrate_agents(
+            agent_ids=req.agent_ids,
+            user_query=req.query,
+            snapshot=snapshot,
+            report=report,
+            history=req.history,
+            mode=req.mode,
+            include_internal=req.include_internal,
+        )
+    except KeyError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+
+@app.get("/api/agents/{agent_id}/health")
+def get_single_agent_health(agent_id: str):
+    try:
+        return get_agent_health(agent_id)
+    except KeyError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+
+@app.post("/api/agents/{agent_id}/ask")
+def ask_agent(agent_id: str, req: AgentAskRequest):
+    snapshot = engine.latest_snapshot()
+    report = engine.full_report()
+    try:
+        return run_agent(
+            agent_id=agent_id,
+            user_query=req.query,
+            snapshot=snapshot,
+            report=report,
+            history=req.history,
+            mode="ask",
+            include_internal=req.include_internal,
+        )
+    except KeyError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+
+@app.post("/api/agents/{agent_id}/analyze")
+def analyze_with_agent(agent_id: str, req: AgentAnalyzeRequest):
+    snapshot = engine.latest_snapshot()
+    report = engine.full_report()
+    try:
+        return run_agent(
+            agent_id=agent_id,
+            user_query=req.query,
+            snapshot=snapshot,
+            report=report,
+            history=[],
+            mode="analyze",
+            include_internal=req.include_internal,
+        )
+    except KeyError as exc:
+        raise HTTPException(404, str(exc)) from exc
 
 
 # ── groq transcription route ─────────────────────────────────
@@ -291,8 +380,8 @@ def voice_plant_context() -> dict:
     # Pull high-risk maintenance items
     maint_result = engine.maintenance.predict(engine.ot_df)
     maint_df = engine.ot_df.copy().tail(50)
-    maint_df["rul_hours"] = maint_result["rul_hours"][:50]
-    maint_df["risk_level"] = maint_result["risk_level"][:50]
+    maint_df["rul_hours"] = maint_result["rul_hours"][-50:]
+    maint_df["risk_level"] = maint_result["risk_level"][-50:]
     high_risk = (
         maint_df[maint_df["risk_level"] == "HIGH"]
         [["equipment_id", "plant_id", "rul_hours", "risk_level"]]
