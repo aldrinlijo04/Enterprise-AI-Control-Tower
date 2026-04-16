@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   PlantSnapshot, PlantReport, AnomalyRow,
-  MaintenanceRow, FailureRow
+  MaintenanceRow, FailureRow,
+  AgentOrchestrationRequest, AgentOrchestrationResponse,
 } from '../models/plant.models';
 
 @Injectable({ providedIn: 'root' })
@@ -38,5 +39,9 @@ export class ApiService {
 
   transcribeAudio(audioB64: string): Observable<{ text: string }> {
     return this.http.post<{ text: string }>(`${this.base}/api/transcribe`, { audio_b64: audioB64 });
+  }
+
+  orchestrateAgents(payload: AgentOrchestrationRequest): Observable<AgentOrchestrationResponse> {
+    return this.http.post<AgentOrchestrationResponse>(`${this.base}/api/agents/orchestrate`, payload);
   }
 }

@@ -344,6 +344,47 @@ body {
 
 .header-time { color: rgba(255,255,255,0.35); font-size: 11px; }
 
+.brief-select {
+  height: 28px;
+  min-width: 210px;
+  border-radius: 18px;
+  border: 1px solid rgba(79, 195, 247, 0.35);
+  background: rgba(79, 195, 247, 0.08);
+  color: #c7ecff;
+  font-family: var(--font-main);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  padding: 0 10px;
+  outline: none;
+}
+
+.brief-select:focus {
+  border-color: rgba(79, 195, 247, 0.6);
+  box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.18);
+}
+
+.brief-btn {
+  height: 28px;
+  border-radius: 18px;
+  border: 1px solid rgba(79, 195, 247, 0.35);
+  background: rgba(79, 195, 247, 0.12);
+  color: #c7ecff;
+  font-family: var(--font-main);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 0 12px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.brief-btn:hover {
+  background: rgba(79, 195, 247, 0.2);
+  border-color: rgba(79, 195, 247, 0.6);
+  color: #ffffff;
+}
+
 .user-profile {
   display: flex; align-items: center; gap: 8px;
   padding: 4px 10px; border-radius: var(--r);
@@ -406,6 +447,16 @@ body {
   flex-direction: column;
   overflow: hidden;
 }
+
+.chat-brief-controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
 .chat-tab app-chat-panel,
 .chat-panel {
   flex: 1;

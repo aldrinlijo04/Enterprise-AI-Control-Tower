@@ -6,6 +6,7 @@ import type { EChartsOption } from 'echarts';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { PlantDataService, PlantState } from '../../services/plant-data.service';
+import { ChatService } from '../../services/chat.service';
 import { RISK_COLOR } from '../../models/plant.models';
 
 import { MetricCardComponent }   from '../../components/metric-card/metric-card.component';
@@ -16,6 +17,7 @@ import { LoadingScreenComponent, ErrorScreenComponent } from '../../components/s
 
 export type Tab = 'overview' | 'energy' | 'anomalies' | 'maintenance' | 'failure' | 'chat';
 export const TABS: Tab[] = ['overview', 'energy', 'anomalies', 'maintenance', 'failure', 'chat'];
+type BriefingPreset = 'all' | 'ops-maint' | 'energy-demand';
 
 const AXIS_STYLE  = {
   axisLabel: { color: '#ffffff', fontSize: 10 },
@@ -53,7 +55,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
   state!: PlantState;
 
   // ── Voice Agent State ──────────────────────────────────────
-  voiceAgentId = '';
+  isVoiceActive  = false;
+  voiceAgentId   = '';
+  voiceLoading   = false;
+  voiceError     = '';
+  briefingPreset: BriefingPreset = 'all';
+
+  private readonly briefingPresetConfig: Record<BriefingPreset, { label: string; agentIds: string[] }> = {
+    all: {
+      label: 'All agents',
+      agentIds: [
+        'operations-intelligence',
+        'predictive-maintenance',
+        'energy-optimizer',
+        'demand-planner',
+      ],
+    },
+    'ops-maint': {
+      label: 'Operations + Maintenance',
+      agentIds: ['operations-intelligence', 'predictive-maintenance'],
+    },
+    'energy-demand': {
+      label: 'Energy + Demand',
+      agentIds: ['energy-optimizer', 'demand-planner'],
+    },
+  };
 
   formatLabel(str: string): string {
     if (!str) return '';
@@ -69,6 +95,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     public svc: PlantDataService,
     private router: Router,
     private route: ActivatedRoute,
+    private chatSvc: ChatService,
   ) {}
 
   ngOnInit(): void {
@@ -126,6 +153,52 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   refresh(): void { this.svc.refresh(); }
+
+  onBriefingPresetChange(event: Event): void {
+    const next = (event.target as HTMLSelectElement).value as BriefingPreset;
+    if (next in this.briefingPresetConfig) {
+      this.briefingPreset = next;
+    }
+  }
+
+  runMultiAgentBriefing(): void {
+    const preset = this.briefingPresetConfig[this.briefingPreset];
+    this.setTab('chat');
+    this.chatSvc.runMultiAgentBriefing(preset.agentIds, preset.label);
+  }
+
+  // ── Voice Agent Toggle ─────────────────────────────────────
+  async toggleVoice(): Promise<void> {
+    // If already active — close it
+    if (this.isVoiceActive) {
+      this.isVoiceActive = false;
+      this.voiceAgentId  = '';
+      this.voiceError    = '';
+      return;
+    }
+
+    this.voiceLoading = true;
+    this.voiceError   = '';
+
+    try {
+      const res = await fetch('http://localhost:8000/api/voice/config');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const cfg = await res.json();
+
+      if (!cfg.agent_id) {
+        this.voiceError = 'Voice agent not configured on server.';
+        return;
+      }
+
+      this.voiceAgentId  = cfg.agent_id;
+      this.isVoiceActive = true;
+    } catch (e: any) {
+      this.voiceError = 'Could not reach voice service.';
+      console.error('Voice agent error:', e);
+    } finally {
+      this.voiceLoading = false;
+    }
+  }
 
   // ── CHART OPTIONS ────────────────────────────────────────────
 

@@ -131,6 +131,42 @@ export interface ChatMessage {
   content: string;
 }
 
+export type AgentPriority = 'low' | 'medium' | 'high' | 'critical';
+
+export interface AgentRunResult {
+  agent_id: string;
+  agent_name: string;
+  mode: 'ask' | 'analyze' | string;
+  query: string;
+  summary: string;
+  findings: string[];
+  actions: string[];
+  priority: AgentPriority | string;
+  confidence: number;
+  assumptions: string[];
+  llm_used: boolean;
+  model: string;
+  internal?: Record<string, unknown>;
+}
+
+export interface AgentOrchestrationRequest {
+  query?: string;
+  history?: ChatMessage[];
+  agent_ids?: string[];
+  include_internal?: boolean;
+  mode?: 'ask' | 'analyze';
+}
+
+export interface AgentOrchestrationResponse {
+  mode: 'ask' | 'analyze' | string;
+  query: string;
+  requested_agents: string[];
+  overall_priority: AgentPriority | string;
+  llm_used_count: number;
+  fallback_count: number;
+  results: AgentRunResult[];
+}
+
 export const RISK_COLOR: Record<string, string> = {
   CRITICAL:          '#ff3b5c',
   HIGH:              '#ff8c42',

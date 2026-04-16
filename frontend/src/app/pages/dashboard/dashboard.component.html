@@ -335,6 +335,19 @@
 
       <!-- ─── CHAT ───────────────────────────────────────────── -->
       <div *ngSwitchCase="'chat'" class="tab-content chat-tab">
+        <div class="chat-brief-controls">
+          <select class="brief-select"
+                  [value]="briefingPreset"
+                  (change)="onBriefingPresetChange($event)"
+                  title="Choose briefing scope">
+            <option value="all">All Agents</option>
+            <option value="ops-maint">Operations + Maintenance</option>
+            <option value="energy-demand">Energy + Demand</option>
+          </select>
+          <button class="brief-btn" (click)="runMultiAgentBriefing()" title="Run multi-agent briefing">
+            Agent Briefing
+          </button>
+        </div>
         <app-chat-panel></app-chat-panel>
       </div>
 
