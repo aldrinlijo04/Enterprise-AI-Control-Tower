@@ -53,10 +53,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   state!: PlantState;
 
   // ── Voice Agent State ──────────────────────────────────────
-  isVoiceActive  = false;
-  voiceAgentId   = '';
-  voiceLoading   = false;
-  voiceError     = '';
+  voiceAgentId = '';
 
   formatLabel(str: string): string {
     if (!str) return '';
@@ -84,6 +81,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       document.body.appendChild(script);
     }
 
+    // ── Auto-load voice agent config on init ─────────────────
+    this.loadVoiceAgent();
+
     // ── Read ?tab= from query params set by landing page ────
     this.routeSub = this.route.queryParams.subscribe(params => {
       const tab = params['tab'] as Tab;
@@ -95,6 +95,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.sub = this.svc.data$.subscribe(s => {
       this.state = s;
     });
+  }
+
+  private async loadVoiceAgent(): Promise<void> {
+    try {
+      const res = await fetch('http://localhost:8000/api/voice/config');
+      if (!res.ok) return;
+      const cfg = await res.json();
+      if (cfg.agent_id) {
+        this.voiceAgentId = cfg.agent_id;
+      }
+    } catch (e) {
+      console.error('Voice agent config error:', e);
+    }
   }
 
   setTab(t: Tab): void {
@@ -113,39 +126,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   refresh(): void { this.svc.refresh(); }
-
-  // ── Voice Agent Toggle ─────────────────────────────────────
-  async toggleVoice(): Promise<void> {
-    // If already active — close it
-    if (this.isVoiceActive) {
-      this.isVoiceActive = false;
-      this.voiceAgentId  = '';
-      this.voiceError    = '';
-      return;
-    }
-
-    this.voiceLoading = true;
-    this.voiceError   = '';
-
-    try {
-      const res = await fetch('http://localhost:8000/api/voice/config');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const cfg = await res.json();
-
-      if (!cfg.agent_id) {
-        this.voiceError = 'Voice agent not configured on server.';
-        return;
-      }
-
-      this.voiceAgentId  = cfg.agent_id;
-      this.isVoiceActive = true;
-    } catch (e: any) {
-      this.voiceError = 'Could not reach voice service.';
-      console.error('Voice agent error:', e);
-    } finally {
-      this.voiceLoading = false;
-    }
-  }
 
   // ── CHART OPTIONS ────────────────────────────────────────────
 

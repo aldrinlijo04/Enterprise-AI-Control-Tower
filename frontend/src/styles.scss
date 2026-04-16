@@ -49,7 +49,6 @@
   --purple:  #5A4A8E;
 
   /* ── Typography ── */
-  
   --font-main: 'Open Sans', sans-serif;
 
   /* ── Radius ── */
@@ -160,7 +159,7 @@ body {
 
 
 /* ════════════════════════════════════════════════════════════
-   STATIC SIDEBAR  (replaces sub-header nav)
+   STATIC SIDEBAR
 ════════════════════════════════════════════════════════════ */
 .sidebar {
   width: var(--sidebar-w);
@@ -174,13 +173,10 @@ body {
   gap: 4px;
   overflow-y: auto;
   overflow-x: hidden;
-
-  /* Always visible — no collapse */
   position: relative;
   z-index: 10;
 }
 
-/* Section label above nav items */
 .sidebar-label {
   font-size: 9px;
   font-weight: 700;
@@ -192,7 +188,6 @@ body {
   margin-bottom: 6px;
 }
 
-/* Individual nav item */
 .menu-item {
   display: flex;
   align-items: center;
@@ -217,7 +212,6 @@ body {
   color: #ffffff;
 }
 
-/* Active state — Air Products green */
 .menu-item.active {
   background: var(--ap-green);
   color: #ffffff;
@@ -238,12 +232,11 @@ body {
 
 
 /* ════════════════════════════════════════════════════════════
-   SUB HEADER — REMOVED (hidden completely)
+   SUB HEADER
 ════════════════════════════════════════════════════════════ */
-/* 🔥 Make header vertical (tabs below plant name) */
 .sub-header {
   display: flex;
-  flex-direction: column;   /* IMPORTANT */
+  flex-direction: column;
   align-items: stretch;
   padding: 10px 20px;
   background: var(--ap-dark);
@@ -251,15 +244,13 @@ body {
   gap: 10px;
 }
 
-/* 🔥 Full-width tab strip */
 .sub-nav {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 1fr;   /* equal width */
+  grid-auto-columns: 1fr;
   gap: 12px;
 }
 
-/* 🔥 Tab button */
 .nav-btn {
   background: #0b2545;
   border: 1px solid #0d3060;
@@ -274,21 +265,21 @@ body {
   text-align: center;
 }
 
-/* Hover */
 .nav-btn:hover {
   background: #102f57;
   color: #ffffff;
 }
 
-/* ✅ ACTIVE TAB (green highlight) */
 .nav-btn.active {
   background: var(--ap-green);
   color: #ffffff;
   border-color: var(--ap-green);
   box-shadow: 0 4px 12px rgba(0,122,51,0.35);
 }
+
+
 /* ════════════════════════════════════════════════════════════
-   HEADER — Hydrogen navy with H₂ blue accent bar
+   HEADER
 ════════════════════════════════════════════════════════════ */
 .dash-header {
   display: flex;
@@ -313,7 +304,6 @@ body {
 
 .header-logo-img { height: 32px; object-fit: contain; }
 
-/* Center title */
 .header-center {
   position: absolute;
   left: 50%;
@@ -327,7 +317,6 @@ body {
   pointer-events: none;
 }
 
-/* Right section */
 .header-right {
   display: flex;
   align-items: center;
@@ -728,6 +717,19 @@ body {
 
 
 /* ════════════════════════════════════════════════════════════
+   ELEVENLABS WIDGET ANCHOR
+   Positions the native widget in the bottom-right corner.
+   The widget itself renders its own UI — we just anchor it.
+════════════════════════════════════════════════════════════ */
+.elevenlabs-widget-anchor {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+}
+
+
+/* ════════════════════════════════════════════════════════════
    MISC
 ════════════════════════════════════════════════════════════ */
 .icon-btn {
@@ -748,7 +750,6 @@ body {
 
 .single-col { grid-template-columns: 1fr !important; }
 
-/* Back button (kept for other uses) */
 .back-btn {
   display: flex;
   align-items: center;
