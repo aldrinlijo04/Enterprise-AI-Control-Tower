@@ -1,0 +1,394 @@
+<!-- Loading / Error states -->
+<app-loading-screen *ngIf="state?.loading"></app-loading-screen>
+<app-error-screen   *ngIf="state?.error && !state?.loading"
+                    [message]="state.error!"
+                    (retry)="refresh()">
+</app-error-screen>
+
+<!-- Main dashboard -->
+<div class="dashboard" *ngIf="state && !state.loading && !state.error">
+
+  <!-- ═══ HEADER ═══════════════════════════════════════════════ -->
+  <header class="dash-header">
+
+    <!-- LEFT: logo + back button -->
+    <div class="header-left">
+      <img src="assets/air-products-logo.png" class="header-logo-img" />
+      <button class="back-btn" (click)="goHome()" title="Back to Home">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        <span>Home</span>
+      </button>
+    </div>
+
+    <!-- CENTER TITLE -->
+    <div class="header-center">
+      AIR OPERATING SYSTEM
+    </div>
+
+    <!-- RIGHT -->
+    <div class="header-right">
+      <span class="live-pill">
+        <span class="live-dot"></span>
+        LIVE
+      </span>
+      <span *ngIf="state.lastRefresh" class="header-time">
+        {{ state.lastRefresh | date:'HH:mm:ss' }}
+      </span>
+      <div class="user-profile">
+        <img src="assets/user.png" class="avatar" />
+        <div class="user-info">
+          <span class="name">Faizal</span>
+          <span class="role">Admin</span>
+        </div>
+      </div>
+    </div>
+
+  </header>
+
+  <!-- ═══ SUB HEADER ═══════════════════════════════════════════ -->
+  <div class="sub-header">
+    <div class="sub-left">
+      <span class="header-plant">
+        {{ state.snap?.plant_id }} / {{ state.snap?.equipment_id }}
+      </span>
+    </div>
+    <div class="sub-nav">
+      <button *ngFor="let t of tabs"
+              class="nav-btn"
+              [class.active]="activeTab === t"
+              (click)="setTab(t)">
+        {{ t.toUpperCase() }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ ALERT BANNER ════════════════════════════════════════ -->
+  <div *ngIf="imminentFailures > 0" class="alert-banner">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff3b5c"
+         stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22c1 0 2-1 2-2H10c0 1 1 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 00-3 0v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+    </svg>
+    <strong>{{ imminentFailures }} unit(s)</strong>&nbsp;flagged IMMINENT failure —
+    avg probability {{ ((state.report?.failure?.avg_failure_probability ?? 0) * 100).toFixed(1) }}%.
+    <span class="banner-equip">{{ criticalEquipKeys() }}</span>
+  </div>
+
+  <!-- ═══ MAIN CONTENT ════════════════════════════════════════ -->
+  <main class="dash-main">
+    <div [ngSwitch]="activeTab">
+
+      <!-- ─── OVERVIEW ─────────────────────────────────────── -->
+      <div *ngSwitchCase="'overview'" class="tab-content">
+        <div class="kpi-strip">
+          <app-metric-card label="Temperature"   [value]="state.snap!.temperature.toFixed(1)"               unit="°C"   accent="#ff8c42"></app-metric-card>
+          <app-metric-card label="Pressure"      [value]="state.snap!.pressure.toFixed(1)"                  unit=" bar" accent="#4facfe"></app-metric-card>
+          <app-metric-card label="Vibration"     [value]="state.snap!.vibration.toFixed(4)"                 unit=" g"   accent="#ffd166"></app-metric-card>
+          <app-metric-card label="Power Draw"    [value]="state.snap!.power_kw.toFixed(1)"                  unit=" kW"  accent="#a78bfa"></app-metric-card>
+          <app-metric-card label="Anomaly Rate"  [value]="state.report!.anomaly.anomaly_rate_pct"            unit="%"    accent="#ff3b5c" [sub]="state.report!.anomaly.total_anomalies + ' events'"></app-metric-card>
+          <app-metric-card label="Avg RUL"       [value]="state.report!.maintenance.avg_rul_hours"           unit=" hrs" accent="#00c853" sub="remaining useful life"></app-metric-card>
+          <app-metric-card label="Fleet Healthy" [value]="state.report!.failure.fleet_health['HEALTHY']"    unit="%"    accent="#00c853" [sub]="imminentFailures + ' imminent'"></app-metric-card>
+          <app-metric-card label="Demand MAE"    [value]="state.report!.demand.mean_absolute_error_pct"      unit="%"    accent="#ffd166" sub="forecast error"></app-metric-card>
+        </div>
+
+        <div class="grid-2-1">
+          <app-module-panel title="Sensor Forecast — Next 10 Steps" iconKey="forecast" accent="#4facfe">
+            <div echarts [options]="forecastChartOpts" style="height:230px;width:100%"></div>
+            <div class="trend-chips">
+              <span *ngFor="let eq of state.report?.maintenance?.by_equipment | keyvalue; trackBy: trackByKey"
+                    class="trend-chip" [class]="eq.value">
+                {{ eq.key }}: {{ eq.value }}
+              </span>
+            </div>
+          </app-module-panel>
+
+          <app-module-panel title="Plant Behavior" iconKey="behavior" accent="#a78bfa"
+                            [badge]="state.report!.plant_behavior.critical_events + ' critical'">
+            <div echarts [options]="behaviorChartOpts" style="height:230px;width:100%"></div>
+          </app-module-panel>
+        </div>
+
+        <div class="grid-2">
+          <app-module-panel title="Demand Prediction by Product" iconKey="demand" accent="#ffd166">
+            <div class="product-grid">
+              <div *ngFor="let p of state.report!.demand.by_product | keyvalue" class="product-row">
+                <span class="prod-name">{{ p.key }}</span>
+                <span class="prod-val">{{ p.value.avg_forecast | number }} <span class="dimtext">forecast</span></span>
+                <span class="prod-val">{{ p.value.avg_actual   | number }} <span class="dimtext">actual</span></span>
+                <span class="stockout-tag" [class]="stockoutClass(p.value.stockout_risk_pct)">
+                  {{ p.value.stockout_risk_pct }}% stockout
+                </span>
+              </div>
+            </div>
+          </app-module-panel>
+
+          <app-module-panel title="Remaining Useful Life by Equipment" iconKey="maintenance" accent="#00c853">
+            <div echarts [options]="maintBarOpts" style="height:200px;width:100%"></div>
+          </app-module-panel>
+        </div>
+
+        <div class="log-banner" *ngIf="state.snap">
+          <span class="log-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 [attr.stroke]="state.snap.log_severity === 'HIGH' ? '#ff3b5c' : '#ffd166'"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22c1 0 2-1 2-2H10c0 1 1 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 00-3 0v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+            </svg>
+          </span>
+          <span class="log-eq">{{ state.snap.equipment_id }}</span>
+          <span class="log-text">{{ state.snap.last_log }}</span>
+          <app-risk-badge [label]="state.snap.log_severity"></app-risk-badge>
+        </div>
+      </div>
+
+      <!-- ─── ENERGY ─────────────────────────────────────────── -->
+      <div *ngSwitchCase="'energy'" class="tab-content">
+        <div class="kpi-strip">
+          <app-metric-card label="Total Energy"    [value]="state.report!.energy.total_energy_kwh"   unit=" kWh" accent="#a78bfa"></app-metric-card>
+          <app-metric-card label="Carbon Emission" [value]="state.report!.energy.carbon_emission_kg" unit=" kg"  accent="#ff3b5c" sub="CO₂ equivalent"></app-metric-card>
+          <app-metric-card label="Energy Cost"     [value]="'₹' + state.report!.energy.energy_cost_INR"          accent="#ffd166"></app-metric-card>
+          <app-metric-card label="Avg Power Draw"  [value]="state.report!.energy.avg_predicted_kw"   unit=" kW"  accent="#4facfe"></app-metric-card>
+          <app-metric-card label="Avg Waste"       [value]="state.report!.energy.avg_waste_kw"        unit=" kW"  accent="#ff8c42" sub="above baseline"></app-metric-card>
+        </div>
+
+        <app-module-panel title="Power Consumption by Equipment" iconKey="energy" accent="#a78bfa">
+          <div echarts [options]="energyBarOpts" style="height:320px;width:100%"></div>
+        </app-module-panel>
+
+        <div class="equip-grid">
+          <div *ngFor="let eq of state.report!.energy.by_equipment | keyvalue"
+               class="equip-card" [style.--accent]="effColor(eq.value.efficiency_pct)">
+            <span class="equip-name">{{ eq.key }}</span>
+            <span class="equip-val">{{ eq.value.avg_kw }} kW avg / {{ eq.value.peak_kw }} kW peak</span>
+            <div class="equip-meta">
+              <span class="equip-rate">Efficiency</span>
+              <span [style.color]="effColor(eq.value.efficiency_pct)" style="font-weight:500">{{ eq.value.efficiency_pct }}%</span>
+            </div>
+            <div class="equip-bar">
+              <div class="equip-fill" [style.width.%]="rstPct(eq.value.efficiency_pct)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── ANOMALIES ──────────────────────────────────────── -->
+      <div *ngSwitchCase="'anomalies'" class="tab-content">
+        <div class="kpi-strip">
+          <app-metric-card label="Total Anomalies" [value]="state.report!.anomaly.total_anomalies"      accent="#ff3b5c"></app-metric-card>
+          <app-metric-card label="Anomaly Rate"    [value]="state.report!.anomaly.anomaly_rate_pct" unit="%" accent="#ff8c42" sub="of all readings"></app-metric-card>
+          <ng-container *ngFor="let eq of sortedAnomalyEquip.slice(0,3)">
+            <app-metric-card [label]="eq[0]" [value]="eq[1].anomaly_rate_pct" unit="%"
+              [accent]="eq[1].anomaly_rate_pct > 20 ? '#ff3b5c' : '#ffd166'"
+              [sub]="eq[1].anomaly_count + ' events'">
+            </app-metric-card>
+          </ng-container>
+        </div>
+
+        <div class="grid-2">
+          <app-module-panel title="Anomaly Events — Latest 20" iconKey="anomaly" accent="#ff3b5c">
+            <div class="data-table">
+              <div class="table-head" style="grid-template-columns:90px 80px 70px 70px 75px 75px 80px">
+                <span>Time</span><span>Equipment</span><span>Plant</span>
+                <span>Temp</span><span>Pressure</span><span>Vibration</span><span>Score</span>
+              </div>
+              <div *ngFor="let row of state.anomalies" class="table-row"
+                   style="grid-template-columns:90px 80px 70px 70px 75px 75px 80px">
+                <span class="dimtext">{{ toTime(row.timestamp) }}</span>
+                <span>{{ row.equipment_id }}</span>
+                <span class="dimtext">{{ row.plant_id }}</span>
+                <span [class]="row.temperature > 120 ? 'val-warn' : ''">{{ row.temperature }}</span>
+                <span [class]="row.pressure    > 180 ? 'val-warn' : ''">{{ row.pressure }}</span>
+                <span [class]="row.vibration   > 0.06 ? 'val-warn' : ''">{{ row.vibration }}</span>
+                <span class="val-red">{{ row.anomaly_score.toFixed(4) }}</span>
+              </div>
+            </div>
+          </app-module-panel>
+
+          <app-module-panel title="Anomaly Rate by Equipment" iconKey="anomaly" accent="#ff8c42">
+            <div class="equip-grid single-col">
+              <div *ngFor="let eq of sortedAnomalyEquip"
+                   class="equip-card" [style.--accent]="anomalyColor(eq[1].anomaly_rate_pct)">
+                <span class="equip-name">{{ eq[0] }}</span>
+                <div class="equip-meta">
+                  <span class="equip-rate">{{ eq[1].anomaly_count }} events</span>
+                  <span [style.color]="anomalyColor(eq[1].anomaly_rate_pct)">{{ eq[1].anomaly_rate_pct }}%</span>
+                </div>
+                <div class="equip-bar">
+                  <div class="equip-fill" [style.width.%]="rstPct(eq[1].anomaly_rate_pct * 4)"></div>
+                </div>
+              </div>
+            </div>
+          </app-module-panel>
+        </div>
+      </div>
+
+      <!-- ─── MAINTENANCE ────────────────────────────────────── -->
+      <div *ngSwitchCase="'maintenance'" class="tab-content">
+        <div class="kpi-strip">
+          <app-metric-card label="Avg RUL"  [value]="state.report!.maintenance.avg_rul_hours"                        unit=" hrs" accent="#00c853" sub="remaining useful life"></app-metric-card>
+          <app-metric-card label="Critical" [value]="state.report!.maintenance.risk_distribution['CRITICAL']"         accent="#ff3b5c"></app-metric-card>
+          <app-metric-card label="High"     [value]="state.report!.maintenance.risk_distribution['HIGH']"             accent="#ff8c42"></app-metric-card>
+          <app-metric-card label="Medium"   [value]="state.report!.maintenance.risk_distribution['MEDIUM']"           accent="#ffd166"></app-metric-card>
+          <app-metric-card label="Low"      [value]="state.report!.maintenance.risk_distribution['LOW']"              accent="#00c853"></app-metric-card>
+        </div>
+
+        <app-module-panel *ngIf="state.report!.maintenance.equipment_needing_attention?.length"
+                          title="Immediate Attention Required" iconKey="alert" accent="#ff3b5c" badge="URGENT">
+          <div class="attention-list">
+            <div *ngFor="let eq of state.report!.maintenance.equipment_needing_attention" class="attention-row">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff3b5c"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22c1 0 2-1 2-2H10c0 1 1 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 00-3 0v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+              </svg>
+              <span class="attention-eq">{{ eq.equipment_id }}</span>
+              <div class="attention-bar">
+                <div class="attention-fill" [style.width.%]="attentionWidth(eq.min_rul)"></div>
+              </div>
+              <span class="val-red">
+                {{ eq.min_rul === 0 ? 'Immediate Risk' : (eq.min_rul + ' hrs RUL') }}
+              </span>
+            </div>
+          </div>
+        </app-module-panel>
+
+        <app-module-panel title="Maintenance Feed — Live" iconKey="maintenance" accent="#00c853">
+          <div class="data-table">
+            <div class="table-head" style="grid-template-columns:90px 90px 80px 100px 110px">
+              <span>Time</span><span>Equipment</span><span>Plant</span><span>RUL (hrs)</span><span>Risk Level</span>
+            </div>
+            <div *ngFor="let row of state.maintenance" class="table-row"
+                 style="grid-template-columns:90px 90px 80px 100px 110px">
+              <span class="dimtext">{{ toTime(row.timestamp) }}</span>
+              <span>{{ row.equipment_id }}</span>
+              <span class="dimtext">{{ row.plant_id }}</span>
+              <span [class]="maintRowClass(row.rul_hours)">{{ row.rul_hours }}</span>
+              <span><app-risk-badge [label]="row.risk_level"></app-risk-badge></span>
+            </div>
+          </div>
+        </app-module-panel>
+
+        <div class="equip-grid">
+          <div *ngFor="let eq of state.report!.maintenance.by_equipment | keyvalue"
+               class="equip-card" [style.--accent]="riskColor(eq.value.dominant_risk)">
+            <span class="equip-name">{{ eq.key }}</span>
+            <app-risk-badge [label]="eq.value.dominant_risk"></app-risk-badge>
+            <span class="equip-val" style="margin-top:8px">Min RUL: {{ eq.value.min_rul_hrs }} hrs</span>
+            <span class="equip-val">Avg RUL: {{ eq.value.avg_rul_hrs }} hrs</span>
+            <div class="equip-bar" style="margin-top:8px">
+              <div class="equip-fill" [style.width.%]="rulWidth(eq.value.avg_rul_hrs)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── FAILURE PREDICTION ─────────────────────────────── -->
+      <div *ngSwitchCase="'failure'" class="tab-content">
+        <div class="kpi-strip">
+          <app-metric-card label="Imminent"      [value]="state.report!.failure.imminent_failures"                                           accent="#ff3b5c" sub="< 24 hrs"></app-metric-card>
+          <app-metric-card label="Avg Fail Prob" [value]="(state.report!.failure.avg_failure_probability * 100).toFixed(1)" unit="%" accent="#ff8c42"></app-metric-card>
+          <app-metric-card label="Fleet Healthy" [value]="state.report!.failure.fleet_health['HEALTHY']"                    unit="%"   accent="#00c853"></app-metric-card>
+          <app-metric-card label="High Risk"     [value]="state.report!.failure.fleet_health['HIGH_RISK']"                  unit="%"   accent="#ff8c42"></app-metric-card>
+          <app-metric-card label="Severity Logs" [value]="state.report!.failure.maintenance_logs_high_severity"                            accent="#ffd166" sub="HIGH severity"></app-metric-card>
+        </div>
+
+        <div class="grid-2">
+          <app-module-panel title="Fleet Health Distribution" iconKey="failure" accent="#ff3b5c">
+            <div echarts [options]="healthBarOpts" style="height:260px;width:100%"></div>
+          </app-module-panel>
+
+          <app-module-panel title="Critical Equipment — Failure Probability" iconKey="failure" accent="#ff8c42">
+            <div class="critical-list">
+              <div *ngFor="let item of criticalEquipList" class="critical-row">
+                <span class="critical-eq">{{ item.eq }}</span>
+                <div class="prob-bar">
+                  <div class="prob-fill"
+                       [style.width.%]="rstPct(item.prob * 100)"
+                       [style.background]="item.prob > 0.75 ? '#ff3b5c' : '#ff8c42'">
+                  </div>
+                </div>
+                <span class="prob-val val-red">{{ (item.prob * 100).toFixed(1) }}%</span>
+              </div>
+            </div>
+          </app-module-panel>
+        </div>
+
+        <app-module-panel title="Equipment Failure Predictions — Live" iconKey="failure" accent="#ff3b5c">
+          <div class="data-table">
+            <div class="table-head" style="grid-template-columns:90px 90px 80px 110px 100px 110px">
+              <span>Time</span><span>Equipment</span><span>Plant</span>
+              <span>Status</span><span>Probability</span><span>Horizon</span>
+            </div>
+            <div *ngFor="let row of state.failures" class="table-row"
+                 style="grid-template-columns:90px 90px 80px 110px 100px 110px">
+              <span class="dimtext">{{ toTime(row.timestamp) }}</span>
+              <span>{{ row.equipment_id }}</span>
+              <span class="dimtext">{{ row.plant_id }}</span>
+              <span><app-risk-badge [label]="row.failure_label"></app-risk-badge></span>
+              <span [class]="failProbClass(row.failure_prob)">{{ (row.failure_prob * 100).toFixed(1) }}%</span>
+              <span class="dimtext">{{ row.failure_horizon }}</span>
+            </div>
+          </div>
+        </app-module-panel>
+      </div>
+
+      <!-- ─── CHAT ───────────────────────────────────────────── -->
+      <div *ngSwitchCase="'chat'" class="tab-content chat-tab">
+        <app-chat-panel></app-chat-panel>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ═══ VOICE PROBE — Fixed bottom-right ════════════════════ -->
+  <div class="voice-probe-container" (click)="toggleVoice()">
+
+    <!-- Loading spinner overlay -->
+    <div *ngIf="voiceLoading" class="probe-loading-ring"></div>
+
+    <!-- Orb button -->
+    <div class="voice-probe-orb" [class.active]="isVoiceActive" [class.error]="!!voiceError">
+
+      <!-- Idle: microphone icon -->
+      <svg *ngIf="!isVoiceActive && !voiceLoading"
+           width="22" height="22" viewBox="0 0 24 24" fill="none"
+           stroke="var(--h2-cyan)" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="2" width="6" height="11" rx="3"/>
+        <path d="M5 10a7 7 0 0 0 14 0"/>
+        <line x1="12" y1="19" x2="12" y2="22"/>
+        <line x1="8"  y1="22" x2="16" y2="22"/>
+      </svg>
+
+      <!-- Active: animated voice bars -->
+      <div *ngIf="isVoiceActive" class="voice-visualizer listening">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <!-- Loading: spinner icon -->
+      <svg *ngIf="voiceLoading && !isVoiceActive"
+           width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="var(--h2-cyan)" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round"
+           class="probe-spin-icon">
+        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/>
+      </svg>
+    </div>
+
+    <!-- Tooltip -->
+    <span class="probe-tooltip">
+      <ng-container *ngIf="voiceError">⚠ {{ voiceError }}</ng-container>
+      <ng-container *ngIf="!voiceError && !isVoiceActive">Talk to ARIA</ng-container>
+      <ng-container *ngIf="!voiceError &&  isVoiceActive">Stop Voice Agent</ng-container>
+    </span>
+  </div>
+
+  <!-- ElevenLabs Conversational Widget -->
+  <elevenlabs-convai
+    *ngIf="isVoiceActive && voiceAgentId"
+    [attr.agent-id]="voiceAgentId"
+    class="elevenlabs-widget-anchor">
+  </elevenlabs-convai>
+
+</div>

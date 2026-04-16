@@ -1,0 +1,51 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+env/
+venv/
+.venv/
+pip-wheel-metadata/
+*.egg-info/
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Node / Angular artifacts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+frontend/.angular/
+frontend/dist/
+frontend/out-tsc/
+frontend/.sass-cache/
+
+# IDE / editor files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs and runtime files
+*.log
+*.local
+*.sqlite3
+*.db
+
+# Coverage reports
+coverage/
+
+# Generated frontend build files
+dist/
+build/
