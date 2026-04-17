@@ -34,6 +34,11 @@
         <span class="live-dot"></span>
         LIVE
       </span>
+      <span *ngIf="state.thresholdStatus as threshold"
+            class="threshold-pill"
+            [class]="thresholdStatusClass(threshold.overall_status)">
+        TWIN {{ thresholdStatusLabel(threshold.overall_status) }}
+      </span>
       <span *ngIf="state.lastRefresh" class="header-time">
         {{ state.lastRefresh | date:'HH:mm:ss' }}
       </span>
@@ -69,11 +74,24 @@
   <div *ngIf="imminentFailures > 0" class="alert-banner">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff3b5c"
          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 22c1 0 2-1 2-2H10c0 1 1 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 00-3 0v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+      <path d="M12 22c1 0 2-1 2-2H10c0 1 1 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
     </svg>
     <strong>{{ imminentFailures }} unit(s)</strong>&nbsp;flagged IMMINENT failure —
     avg probability {{ ((state.report?.failure?.avg_failure_probability ?? 0) * 100).toFixed(1) }}%.
     <span class="banner-equip">{{ criticalEquipKeys() }}</span>
+  </div>
+
+  <div *ngIf="showThresholdBanner"
+       class="threshold-banner"
+       [class]="thresholdStatusClass(thresholdOverallStatus)">
+    <strong>{{ thresholdHeadline }}</strong>
+    <span class="threshold-signals" *ngIf="thresholdTopSignals.length">
+      Signals:
+      <span *ngFor="let signal of thresholdTopSignals; let i = index">
+        {{ formatLabel(signal.signal) }}<span *ngIf="i < thresholdTopSignals.length - 1"> · </span>
+      </span>
+    </span>
+    <span class="banner-equip">{{ thresholdAgentImpactSummary }}</span>
   </div>
 
   <!-- ═══ MAIN CONTENT ════════════════════════════════════════ -->
@@ -98,8 +116,8 @@
             <div echarts [options]="forecastChartOpts" style="height:230px;width:100%"></div>
             <div class="trend-chips">
               <span *ngFor="let eq of state.report?.maintenance?.by_equipment | keyvalue; trackBy: trackByKey"
-                    class="trend-chip" [class]="eq.value">
-                {{ eq.key }}: {{ eq.value }}
+                    class="trend-chip" [class]="maintenanceTrendClass(eq.value)">
+                {{ eq.key }}: {{ maintenanceTrendText(eq.value) }}
               </span>
             </div>
           </app-module-panel>
@@ -134,7 +152,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                  [attr.stroke]="state.snap.log_severity === 'HIGH' ? '#ff3b5c' : '#ffd166'"
                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22c1 0 2-1 2-2H10c0 1 1 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 00-3 0v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+              <path d="M12 22c1 0 2-1 2-2H10c0 1 1 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
             </svg>
           </span>
           <span class="log-eq">{{ state.snap.equipment_id }}</span>
@@ -189,12 +207,12 @@
         <div class="grid-2">
           <app-module-panel title="Anomaly Events — Latest 20" iconKey="anomaly" accent="#ff3b5c">
             <div class="data-table">
-              <div class="table-head" style="grid-template-columns:90px 80px 70px 70px 75px 75px 80px">
+              <div class="table-head" style="grid-template-columns:90px 80px 70px 70px 75px 75px 80px 110px 140px">
                 <span>Time</span><span>Equipment</span><span>Plant</span>
-                <span>Temp</span><span>Pressure</span><span>Vibration</span><span>Score</span>
+                <span>Temp</span><span>Pressure</span><span>Vibration</span><span>Score</span><span>Threshold</span><span>Signals</span>
               </div>
               <div *ngFor="let row of state.anomalies" class="table-row"
-                   style="grid-template-columns:90px 80px 70px 70px 75px 75px 80px">
+                   style="grid-template-columns:90px 80px 70px 70px 75px 75px 80px 110px 140px">
                 <span class="dimtext">{{ toTime(row.timestamp) }}</span>
                 <span>{{ row.equipment_id }}</span>
                 <span class="dimtext">{{ row.plant_id }}</span>
@@ -202,6 +220,10 @@
                 <span [class]="row.pressure    > 180 ? 'val-warn' : ''">{{ row.pressure }}</span>
                 <span [class]="row.vibration   > 0.06 ? 'val-warn' : ''">{{ row.vibration }}</span>
                 <span class="val-red">{{ row.anomaly_score.toFixed(4) }}</span>
+                <span class="threshold-chip" [class]="thresholdStatusClass(row.threshold_status)">
+                  {{ thresholdStatusLabel(row.threshold_status) }}
+                </span>
+                <span class="dimtext">{{ signalListShort(row.flagged_signals) }}</span>
               </div>
             </div>
           </app-module-panel>
@@ -240,7 +262,7 @@
             <div *ngFor="let eq of state.report!.maintenance.equipment_needing_attention" class="attention-row">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff3b5c"
                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22c1 0 2-1 2-2H10c0 1 1 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 00-3 0v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                <path d="M12 22c1 0 2-1 2-2H10c0 1 1 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
               </svg>
               <span class="attention-eq">{{ eq.equipment_id }}</span>
               <div class="attention-bar">

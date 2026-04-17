@@ -7,7 +7,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 import { PlantDataService, PlantState } from '../../services/plant-data.service';
 import { ChatService } from '../../services/chat.service';
-import { RISK_COLOR } from '../../models/plant.models';
+import { RISK_COLOR, ThresholdSignalFlag } from '../../models/plant.models';
 
 import { MetricCardComponent }   from '../../components/metric-card/metric-card.component';
 import { ModulePanelComponent }  from '../../components/module-panel/module-panel.component';
@@ -50,14 +50,18 @@ const GRID_STY = { left: 8, right: 8, top: 8, bottom: 24, containLabel: true };
 })
 export class DashboardComponent implements OnInit, OnDestroy {
 
+  private readonly thresholdStatusOrder: Record<string, number> = {
+    normal: 0,
+    'near-threshold': 1,
+    warning: 2,
+    critical: 3,
+  };
+
   tabs = TABS;
   activeTab: Tab = 'overview';
   state!: PlantState;
 
   // ── Voice Agent State ──────────────────────────────────────
-<<<<<<< HEAD
-  voiceAgentId = '';
-=======
   isVoiceActive  = false;
   voiceAgentId   = '';
   voiceLoading   = false;
@@ -83,13 +87,52 @@ export class DashboardComponent implements OnInit, OnDestroy {
       agentIds: ['energy-optimizer', 'demand-planner'],
     },
   };
->>>>>>> 4c841c84 (agent briefing)
 
   formatLabel(str: string): string {
     if (!str) return '';
     return str.toLowerCase()
               .replace(/_/g, ' ')
               .replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  maintenanceTrendClass(value: unknown): 'rising' | 'stable' | 'falling' {
+    const risk = String((value as { dominant_risk?: string })?.dominant_risk ?? '').toUpperCase();
+    if (risk.includes('HIGH') || risk.includes('CRITICAL')) return 'rising';
+    if (risk.includes('MEDIUM') || risk.includes('MODERATE')) return 'stable';
+    return 'falling';
+  }
+
+  maintenanceTrendText(value: unknown): string {
+    const entry = value as { dominant_risk?: string; avg_rul_hrs?: number };
+    const riskText = this.formatLabel(String(entry?.dominant_risk ?? 'unknown'));
+    const avgRul = Number(entry?.avg_rul_hrs ?? 0);
+    if (!Number.isFinite(avgRul) || avgRul <= 0) return riskText;
+    return `${riskText} • ${avgRul.toFixed(0)}h`;
+  }
+
+  normalizeThresholdStatus(status: unknown): 'normal' | 'near-threshold' | 'warning' | 'critical' {
+    const value = String(status ?? '').toLowerCase();
+    if (value === 'critical') return 'critical';
+    if (value === 'warning') return 'warning';
+    if (value === 'near-threshold') return 'near-threshold';
+    return 'normal';
+  }
+
+  thresholdStatusClass(status: unknown): string {
+    const normalized = this.normalizeThresholdStatus(status);
+    return `thr-${normalized}`;
+  }
+
+  thresholdStatusLabel(status: unknown): string {
+    const normalized = this.normalizeThresholdStatus(status);
+    if (normalized === 'near-threshold') return 'NEAR THRESHOLD';
+    return normalized.toUpperCase();
+  }
+
+  signalListShort(flags: ThresholdSignalFlag[] = []): string {
+    const names = (flags || []).slice(0, 2).map((f) => this.formatLabel(f.signal));
+    if (!names.length) return '--';
+    return names.join(' · ');
   }
 
   private sub!: Subscription;
@@ -158,8 +201,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   refresh(): void { this.svc.refresh(); }
 
-<<<<<<< HEAD
-=======
   onBriefingPresetChange(event: Event): void {
     const next = (event.target as HTMLSelectElement).value as BriefingPreset;
     if (next in this.briefingPresetConfig) {
@@ -206,7 +247,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
->>>>>>> 4c841c84 (agent briefing)
   // ── CHART OPTIONS ────────────────────────────────────────────
 
   get forecastChartOpts(): EChartsOption {
@@ -365,6 +405,61 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   get imminentFailures(): number {
     return this.state.report?.failure?.imminent_failures ?? 0;
+  }
+
+  get thresholdOverallStatus(): 'normal' | 'near-threshold' | 'warning' | 'critical' {
+    return this.normalizeThresholdStatus(this.state.thresholdStatus?.overall_status);
+  }
+
+  get showThresholdBanner(): boolean {
+    return this.thresholdOverallStatus !== 'normal';
+  }
+
+  get thresholdHeadline(): string {
+    const status = this.thresholdOverallStatus;
+    if (status === 'critical') return 'Critical digital twin threshold breach detected.';
+    if (status === 'warning') return 'Warning-level threshold proximity detected.';
+    if (status === 'near-threshold') return 'Equipment signals are approaching calibrated limits.';
+    return 'Signals are within calibrated threshold range.';
+  }
+
+  get thresholdTopSignals(): ThresholdSignalFlag[] {
+    const flags = this.state.thresholdStatus?.flagged_signals ?? [];
+    return [...flags]
+      .sort((a, b) => {
+        const statusDelta =
+          (this.thresholdStatusOrder[this.normalizeThresholdStatus(b.status)] ?? 0)
+          - (this.thresholdStatusOrder[this.normalizeThresholdStatus(a.status)] ?? 0);
+        if (statusDelta !== 0) return statusDelta;
+        return (Number(b.proximity_to_warning_pct) || 0) - (Number(a.proximity_to_warning_pct) || 0);
+      })
+      .slice(0, 3);
+  }
+
+  get thresholdAgentImpactSummary(): string {
+    const rows = this.state.anomalies ?? [];
+    const counts: Record<string, number> = {};
+
+    for (const row of rows) {
+      if (this.normalizeThresholdStatus(row.threshold_status) === 'normal') continue;
+      for (const agentId of Object.keys(row.agent_impacts || {})) {
+        counts[agentId] = (counts[agentId] || 0) + 1;
+      }
+    }
+
+    const labelMap: Record<string, string> = {
+      'operations-intelligence': 'Ops',
+      'predictive-maintenance': 'Maintenance',
+      'energy-optimizer': 'Energy',
+      'demand-planner': 'Demand',
+    };
+
+    const top = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([agentId, count]) => `${labelMap[agentId] || this.formatLabel(agentId)} (${count})`);
+
+    return top.length ? top.join(' · ') : 'No agent impact clusters';
   }
 
   get criticalEquipList(): { eq: string; prob: number }[] {

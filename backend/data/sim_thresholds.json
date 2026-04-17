@@ -1,0 +1,294 @@
+{
+  "generated_at": "2026-04-17T09:38:16.281820+00:00",
+  "rows_used": 180,
+  "seed": 42,
+  "scenario_ids": [
+    "thermal-runaway",
+    "pressure-surge",
+    "vibration-resonance",
+    "lubrication-loss",
+    "electrical-instability",
+    "cascade-fault"
+  ],
+  "signals": {
+    "temperature": {
+      "direction": "high",
+      "near_threshold": 127.2317,
+      "warning_threshold": 133.9281,
+      "critical_threshold": 139.0834,
+      "baseline_median": 93.875,
+      "stress_median": 104.6709,
+      "unit": "degC"
+    },
+    "pressure": {
+      "direction": "high",
+      "near_threshold": 189.781,
+      "warning_threshold": 199.7694,
+      "critical_threshold": 208.2703,
+      "baseline_median": 138.41,
+      "stress_median": 151.8657,
+      "unit": "bar"
+    },
+    "flow_rate": {
+      "direction": "low",
+      "near_threshold": 23.6703,
+      "warning_threshold": 22.5431,
+      "critical_threshold": 19.8675,
+      "baseline_median": 27.29,
+      "stress_median": 24.7899,
+      "unit": "LPM"
+    },
+    "vibration": {
+      "direction": "high",
+      "near_threshold": 0.0412,
+      "warning_threshold": 0.0434,
+      "critical_threshold": 0.0491,
+      "baseline_median": 0.0304,
+      "stress_median": 0.037,
+      "unit": "g"
+    },
+    "rpm": {
+      "direction": "high",
+      "near_threshold": 1380.9106,
+      "warning_threshold": 1453.5901,
+      "critical_threshold": 1529.8692,
+      "baseline_median": 1467.85,
+      "stress_median": 1470.1884,
+      "unit": "rpm"
+    },
+    "bearing_temp": {
+      "direction": "high",
+      "near_threshold": 140.4739,
+      "warning_threshold": 147.8673,
+      "critical_threshold": 154.0215,
+      "baseline_median": 106.085,
+      "stress_median": 122.6165,
+      "unit": "degC"
+    },
+    "oil_level_pct": {
+      "direction": "low",
+      "near_threshold": 55.5119,
+      "warning_threshold": 52.8684,
+      "critical_threshold": 45.9342,
+      "baseline_median": 66.5,
+      "stress_median": 55.4883,
+      "unit": "%"
+    },
+    "voltage": {
+      "direction": "low",
+      "near_threshold": 238.2787,
+      "warning_threshold": 226.9321,
+      "critical_threshold": 220.1242,
+      "baseline_median": 228.0,
+      "stress_median": 227.7134,
+      "unit": "V"
+    },
+    "current_a": {
+      "direction": "high",
+      "near_threshold": 169.9176,
+      "warning_threshold": 178.8607,
+      "critical_threshold": 194.6931,
+      "baseline_median": 136.28,
+      "stress_median": 146.8033,
+      "unit": "A"
+    },
+    "power_kw": {
+      "direction": "high",
+      "near_threshold": 383.7359,
+      "warning_threshold": 403.9325,
+      "critical_threshold": 452.1047,
+      "baseline_median": 323.75,
+      "stress_median": 354.5088,
+      "unit": "kW"
+    },
+    "power_factor": {
+      "direction": "low",
+      "near_threshold": 0.9167,
+      "warning_threshold": 0.8731,
+      "critical_threshold": 0.8422,
+      "baseline_median": 0.901,
+      "stress_median": 0.8714,
+      "unit": "pf"
+    },
+    "noise_db": {
+      "direction": "high",
+      "near_threshold": 66.4422,
+      "warning_threshold": 69.9391,
+      "critical_threshold": 74.1767,
+      "baseline_median": 67.5,
+      "stress_median": 71.3383,
+      "unit": "dB"
+    }
+  },
+  "agent_thresholds": {
+    "operations-intelligence": {
+      "temperature": {
+        "direction": "high",
+        "near_threshold": 127.2317,
+        "warning_threshold": 133.9281,
+        "critical_threshold": 139.0834,
+        "baseline_median": 93.875,
+        "stress_median": 104.6709,
+        "unit": "degC"
+      },
+      "pressure": {
+        "direction": "high",
+        "near_threshold": 189.781,
+        "warning_threshold": 199.7694,
+        "critical_threshold": 208.2703,
+        "baseline_median": 138.41,
+        "stress_median": 151.8657,
+        "unit": "bar"
+      },
+      "vibration": {
+        "direction": "high",
+        "near_threshold": 0.0412,
+        "warning_threshold": 0.0434,
+        "critical_threshold": 0.0491,
+        "baseline_median": 0.0304,
+        "stress_median": 0.037,
+        "unit": "g"
+      },
+      "flow_rate": {
+        "direction": "low",
+        "near_threshold": 23.6703,
+        "warning_threshold": 22.5431,
+        "critical_threshold": 19.8675,
+        "baseline_median": 27.29,
+        "stress_median": 24.7899,
+        "unit": "LPM"
+      },
+      "noise_db": {
+        "direction": "high",
+        "near_threshold": 66.4422,
+        "warning_threshold": 69.9391,
+        "critical_threshold": 74.1767,
+        "baseline_median": 67.5,
+        "stress_median": 71.3383,
+        "unit": "dB"
+      }
+    },
+    "predictive-maintenance": {
+      "bearing_temp": {
+        "direction": "high",
+        "near_threshold": 140.4739,
+        "warning_threshold": 147.8673,
+        "critical_threshold": 154.0215,
+        "baseline_median": 106.085,
+        "stress_median": 122.6165,
+        "unit": "degC"
+      },
+      "oil_level_pct": {
+        "direction": "low",
+        "near_threshold": 55.5119,
+        "warning_threshold": 52.8684,
+        "critical_threshold": 45.9342,
+        "baseline_median": 66.5,
+        "stress_median": 55.4883,
+        "unit": "%"
+      },
+      "vibration": {
+        "direction": "high",
+        "near_threshold": 0.0412,
+        "warning_threshold": 0.0434,
+        "critical_threshold": 0.0491,
+        "baseline_median": 0.0304,
+        "stress_median": 0.037,
+        "unit": "g"
+      },
+      "rpm": {
+        "direction": "high",
+        "near_threshold": 1380.9106,
+        "warning_threshold": 1453.5901,
+        "critical_threshold": 1529.8692,
+        "baseline_median": 1467.85,
+        "stress_median": 1470.1884,
+        "unit": "rpm"
+      }
+    },
+    "energy-optimizer": {
+      "power_kw": {
+        "direction": "high",
+        "near_threshold": 383.7359,
+        "warning_threshold": 403.9325,
+        "critical_threshold": 452.1047,
+        "baseline_median": 323.75,
+        "stress_median": 354.5088,
+        "unit": "kW"
+      },
+      "current_a": {
+        "direction": "high",
+        "near_threshold": 169.9176,
+        "warning_threshold": 178.8607,
+        "critical_threshold": 194.6931,
+        "baseline_median": 136.28,
+        "stress_median": 146.8033,
+        "unit": "A"
+      },
+      "power_factor": {
+        "direction": "low",
+        "near_threshold": 0.9167,
+        "warning_threshold": 0.8731,
+        "critical_threshold": 0.8422,
+        "baseline_median": 0.901,
+        "stress_median": 0.8714,
+        "unit": "pf"
+      },
+      "voltage": {
+        "direction": "low",
+        "near_threshold": 238.2787,
+        "warning_threshold": 226.9321,
+        "critical_threshold": 220.1242,
+        "baseline_median": 228.0,
+        "stress_median": 227.7134,
+        "unit": "V"
+      }
+    },
+    "demand-planner": {
+      "flow_rate": {
+        "direction": "low",
+        "near_threshold": 23.6703,
+        "warning_threshold": 22.5431,
+        "critical_threshold": 19.8675,
+        "baseline_median": 27.29,
+        "stress_median": 24.7899,
+        "unit": "LPM"
+      },
+      "power_kw": {
+        "direction": "high",
+        "near_threshold": 383.7359,
+        "warning_threshold": 403.9325,
+        "critical_threshold": 452.1047,
+        "baseline_median": 323.75,
+        "stress_median": 354.5088,
+        "unit": "kW"
+      },
+      "temperature": {
+        "direction": "high",
+        "near_threshold": 127.2317,
+        "warning_threshold": 133.9281,
+        "critical_threshold": 139.0834,
+        "baseline_median": 93.875,
+        "stress_median": 104.6709,
+        "unit": "degC"
+      },
+      "pressure": {
+        "direction": "high",
+        "near_threshold": 189.781,
+        "warning_threshold": 199.7694,
+        "critical_threshold": 208.2703,
+        "baseline_median": 138.41,
+        "stress_median": 151.8657,
+        "unit": "bar"
+      }
+    }
+  },
+  "summary": {
+    "baseline_rows": 180,
+    "simulated_rows": 3240,
+    "stress_positive_rows": 2626,
+    "anomaly_hit_rate_pct": 27.84,
+    "high_or_critical_maintenance_pct": 76.54,
+    "failure_risk_pct": 65.96
+  }
+}

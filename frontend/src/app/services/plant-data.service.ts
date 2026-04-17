@@ -3,8 +3,10 @@ import { BehaviorSubject, forkJoin, Subscription, timer } from 'rxjs';
 import { switchMap, startWith } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import {
-  PlantSnapshot, PlantReport, AnomalyRow,
-  MaintenanceRow, FailureRow
+  PlantSnapshot, PlantReport,
+  AnomalyThresholdRow,
+  MaintenanceRow, FailureRow,
+  ThresholdStatus,
 } from '../models/plant.models';
 
 const POLL_MS = 30_000;
@@ -12,9 +14,12 @@ const POLL_MS = 30_000;
 export interface PlantState {
   snap:        PlantSnapshot | null;
   report:      PlantReport   | null;
-  anomalies:   AnomalyRow[];
+  anomalies:   AnomalyThresholdRow[];
   maintenance: MaintenanceRow[];
   failures:    FailureRow[];
+  thresholdStatus: ThresholdStatus | null;
+  thresholdGeneratedAt: string | null;
+  thresholdStatusCounts: Record<string, number>;
   loading:     boolean;
   error:       string | null;
   lastRefresh: Date | null;
@@ -25,6 +30,7 @@ export class PlantDataService implements OnDestroy {
 
   private state$ = new BehaviorSubject<PlantState>({
     snap: null, report: null, anomalies: [], maintenance: [],
+    thresholdStatus: null, thresholdGeneratedAt: null, thresholdStatusCounts: {},
     failures: [], loading: true, error: null, lastRefresh: null,
   });
 
@@ -37,16 +43,23 @@ export class PlantDataService implements OnDestroy {
     this.pollSub = this.refreshTrigger$.pipe(
       switchMap(() => timer(0, POLL_MS)),
       switchMap(() => forkJoin([
-        this.api.getSnapshot(),
+        this.api.getSnapshotThresholdStatus(),
         this.api.getReport(),
-        this.api.getAnomalies(),
+        this.api.getAnomalyThresholdFlags(20),
         this.api.getMaintenance(),
         this.api.getFailure(),
       ]))
     ).subscribe({
-      next: ([snap, report, anomalies, maintenance, failures]) => {
+      next: ([snapshotStatus, report, anomalyFlags, maintenance, failures]) => {
         this.state$.next({
-          snap, report, anomalies, maintenance, failures,
+          snap: snapshotStatus.snapshot,
+          report,
+          anomalies: anomalyFlags.rows,
+          maintenance,
+          failures,
+          thresholdStatus: snapshotStatus.threshold_status,
+          thresholdGeneratedAt: snapshotStatus.threshold_generated_at,
+          thresholdStatusCounts: anomalyFlags.status_counts ?? {},
           loading: false, error: null, lastRefresh: new Date(),
         });
       },

@@ -10,6 +10,32 @@ export interface PlantSnapshot {
   timestamp: string;
 }
 
+export type ThresholdStatusLevel = 'normal' | 'near-threshold' | 'warning' | 'critical';
+
+export interface ThresholdSignalFlag {
+  signal: string;
+  value: number;
+  unit: string;
+  direction: 'high' | 'low' | string;
+  status: ThresholdStatusLevel | string;
+  trigger_threshold: number | null;
+  warning_threshold: number;
+  critical_threshold: number;
+  proximity_to_warning_pct: number;
+}
+
+export interface ThresholdStatus {
+  overall_status: ThresholdStatusLevel | string;
+  flagged_signals: ThresholdSignalFlag[];
+  flagged_count: number;
+}
+
+export interface SnapshotThresholdResponse {
+  snapshot: PlantSnapshot;
+  threshold_status: ThresholdStatus;
+  threshold_generated_at: string | null;
+}
+
 export interface ForecastSteps {
   temperature: number[];
   pressure: number[];
@@ -107,6 +133,26 @@ export interface AnomalyRow {
   pressure: number;
   vibration: number;
   anomaly_score: number;
+}
+
+export interface ThresholdAgentImpacts {
+  [agentId: string]: ThresholdSignalFlag[];
+}
+
+export interface AnomalyThresholdRow extends AnomalyRow {
+  flow_rate: number;
+  power_kw: number;
+  anomaly_flag: number;
+  threshold_status: ThresholdStatusLevel | string;
+  flagged_signals: ThresholdSignalFlag[];
+  agent_impacts: ThresholdAgentImpacts;
+}
+
+export interface AnomalyThresholdResponse {
+  threshold_generated_at: string | null;
+  threshold_rows_used: number;
+  status_counts: Record<ThresholdStatusLevel | string, number>;
+  rows: AnomalyThresholdRow[];
 }
 
 export interface MaintenanceRow {

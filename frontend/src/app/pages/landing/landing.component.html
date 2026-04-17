@@ -1,225 +1,52 @@
-<div class="landing">
+<div class="launch-page">
+  <div class="bg-grid"></div>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+  <div class="bg-orb orb-c"></div>
 
-  <!-- ═══ BACKGROUND GRID ═══════════════════════════════════ -->
-  <div class="grid-overlay"></div>
-  <div class="glow glow-1"></div>
-  <div class="glow glow-2"></div>
-  <div class="glow glow-3"></div>
-  <!-- Hydrogen molecule decorative SVG -->
-  <svg class="h2-bg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="120" cy="200" r="60" fill="none" stroke="rgba(0,180,255,0.08)" stroke-width="2"/>
-    <circle cx="280" cy="200" r="60" fill="none" stroke="rgba(0,180,255,0.08)" stroke-width="2"/>
-    <circle cx="120" cy="200" r="24" fill="rgba(0,140,255,0.06)"/>
-    <circle cx="280" cy="200" r="24" fill="rgba(0,140,255,0.06)"/>
-    <line x1="144" y1="200" x2="256" y2="200" stroke="rgba(0,200,255,0.12)" stroke-width="4"/>
-    <circle cx="120" cy="200" r="6" fill="rgba(0,200,255,0.3)"/>
-    <circle cx="280" cy="200" r="6" fill="rgba(0,200,255,0.3)"/>
-    <circle cx="50"  cy="80"  r="40" fill="none" stroke="rgba(0,120,255,0.05)" stroke-width="1.5"/>
-    <circle cx="350" cy="320" r="50" fill="none" stroke="rgba(0,120,255,0.05)" stroke-width="1.5"/>
-  </svg>
-
-  <!-- ═══ HEADER ════════════════════════════════════════════ -->
-  <header class="land-header">
-    <div class="land-logo">
-      <img src="assets/air-products-logo.png" class="land-logo-img" />
-    </div>
-    <div class="land-header-center">
-      <span class="land-system-name">AIR OPERATING SYSTEM</span>
-    </div>
-    <div class="land-header-right">
-      <span class="live-pill">
-        <span class="live-dot"></span>
-        LIVE
-      </span>
-      <div class="user-profile">
-        <img src="assets/user.png" class="avatar" />
-        <div class="user-info">
-          <span class="name">AIRA</span>
-          <span class="role">Admin</span>
-        </div>
-      </div>
+  <header class="launch-header">
+    <img src="assets/air-products-logo.png" class="launch-logo" alt="Air Products" />
+    <div class="header-pill">
+      <span class="header-dot"></span>
+      CONTROL TOWER LIVE
     </div>
   </header>
 
-  <!-- ═══ HERO ═══════════════════════════════════════════════ -->
-  <section class="hero">
-    <div class="hero-eyebrow">
-      <span class="eyebrow-dot"></span>
-      AIRA — AIR AGENT FOR REAL-TIME ANALYTICS
-    </div>
-    
-    <p class="hero-sub">
-      Monitor, predict and act across your entire plant network in real time. 
-      Select a module below to begin.
+  <main class="launch-main">
+    <p class="launch-kicker">Enterprise AI Control Tower</p>
+    <h1 class="launch-title">Choose Your Workspace</h1>
+    <p class="launch-subtitle">
+      Jump directly into the workspace you need: multi-agent operations, AIR OS telemetry,
+      or the upcoming finance intelligence cockpit.
     </p>
 
-    
-  </section>
+    <section class="tile-grid" aria-label="Workspace launcher">
+      <button class="launch-tile tile-workshop" type="button" (click)="openTile('agent-workshop')">
+        <span class="tile-status">LIVE</span>
+        <h2 class="tile-title">Agent Workshop</h2>
+        <p class="tile-text">
+          Open the collaborative agent workspace and continue in the chat orchestration view.
+        </p>
+        <span class="tile-cta">Open Workshop</span>
+      </button>
 
-  <!-- ═══ MODULE CARDS ════════════════════════════════════════ -->
-  <section class="modules">
-    <div class="modules-label">SELECT MODULE</div>
+      <button class="launch-tile tile-airos" type="button" (click)="openTile('air-os')">
+        <span class="tile-status">LIVE</span>
+        <h2 class="tile-title">AIR OS</h2>
+        <p class="tile-text">
+          Enter the operations dashboard for plant KPIs, maintenance health, and failure intelligence.
+        </p>
+        <span class="tile-cta">Open AIR OS</span>
+      </button>
 
-    <div class="cards-grid">
-
-      <!-- OVERVIEW -->
-      <div class="module-card" (click)="navigate('overview')" style="--card-accent:#4facfe; --card-delay:0ms">
-        <div class="card-glow"></div>
-        <div class="card-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-            <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-          </svg>
-        </div>
-        <div class="card-body">
-  
-          <h3 class="card-title">Overview</h3>
-          <p class="card-desc">Live sensor KPIs, forecast trends, plant behavior and demand prediction at a glance.</p>
-        </div>
-        <div class="card-footer">
-          <span class="card-metrics">
-            <span>Temp · Pressure · Vibration · Power</span>
-          </span>
-          <span class="card-arrow">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </span>
-        </div>
-      </div>
-
-      <!-- ENERGY -->
-      <div class="module-card" (click)="navigate('energy')" style="--card-accent:#a78bfa; --card-delay:60ms">
-        <div class="card-glow"></div>
-        <div class="card-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-          </svg>
-        </div>
-        <div class="card-body">
-          <h3 class="card-title">Energy</h3>
-          <p class="card-desc">Track power consumption, carbon emissions, energy cost and efficiency across all equipment.</p>
-        </div>
-        <div class="card-footer">
-          <span class="card-metrics">
-            <span>kWh · CO₂ · Cost · Efficiency</span>
-          </span>
-          <span class="card-arrow">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </span>
-        </div>
-      </div>
-
-      <!-- ANOMALIES -->
-      <div class="module-card" (click)="navigate('anomalies')" style="--card-accent:#ff8c42; --card-delay:120ms">
-        <div class="card-glow"></div>
-        <div class="card-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-          </svg>
-        </div>
-        <div class="card-body">
-          <h3 class="card-title">Anomalies</h3>
-          <p class="card-desc">Detect and investigate sensor anomalies with real-time event logs and per-equipment rate analysis.</p>
-        </div>
-        <div class="card-footer">
-          <span class="card-metrics">
-            <span>Events · Rate % · Score · Equipment</span>
-          </span>
-          <span class="card-arrow">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </span>
-        </div>
-      </div>
-
-      <!-- MAINTENANCE -->
-      <div class="module-card" (click)="navigate('maintenance')" style="--card-accent:#00c853; --card-delay:180ms">
-        <div class="card-glow"></div>
-        <div class="card-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
-          </svg>
-        </div>
-        <div class="card-body">
-          <h3 class="card-title">Maintenance</h3>
-          <p class="card-desc">Monitor remaining useful life, risk distribution and equipment needing immediate attention.</p>
-        </div>
-        <div class="card-footer">
-          <span class="card-metrics">
-            <span>RUL hrs · Risk · Critical · Feed</span>
-          </span>
-          <span class="card-arrow">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </span>
-        </div>
-      </div>
-
-      <!-- FAILURE -->
-      <div class="module-card" (click)="navigate('failure')" style="--card-accent:#ff3b5c; --card-delay:240ms">
-        <div class="card-glow"></div>
-        <div class="card-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-        </div>
-        <div class="card-body">
-          <h3 class="card-title">Failure Prediction</h3>
-          <p class="card-desc">AI-driven failure probability scoring with fleet health distribution and imminent risk alerts.</p>
-        </div>
-        <div class="card-footer">
-          <span class="card-metrics">
-            <span>Probability · Fleet · Horizon · Risk</span>
-          </span>
-          <span class="card-arrow">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </span>
-        </div>
-      </div>
-
-      <!-- CHAT -->
-      <div class="module-card card-chat" (click)="navigate('chat')" style="--card-accent:#6dda96; --card-delay:300ms">
-        <div class="card-glow"></div>
-        <div class="card-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-          </svg>
-        </div>
-        <div class="card-body">
-          <h3 class="card-title">ARIA Chat</h3>
-          <p class="card-desc">Ask ARIA anything about your plant — anomalies, energy waste, forecasts, maintenance priorities.</p>
-        </div>
-        <div class="card-footer">
-          <span class="card-metrics">
-            <span class="chat-badge">AI Powered · 7 Models</span>
-          </span>
-          <span class="card-arrow">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </span>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ═══ FOOTER ══════════════════════════════════════════════ -->
-  <footer class="land-footer">
-    <span>AIR OPERATING SYSTEM · ARIA v2.0</span>
-    <span class="foot-sep">·</span>
-    <span>Air Products & Chemicals</span>
-    <span class="foot-sep">·</span>
-    <span class="foot-live"><span class="live-dot"></span> All systems operational</span>
-  </footer>
-
+      <button class="launch-tile tile-finpilot" type="button" (click)="openTile('finpilot')">
+        <span class="tile-status placeholder">PLACEHOLDER</span>
+        <h2 class="tile-title">FINPILOT</h2>
+        <p class="tile-text">
+          Finance cockpit placeholder is ready here. We can integrate full FINPILOT flows next.
+        </p>
+        <span class="tile-cta">Open Placeholder</span>
+      </button>
+    </section>
+  </main>
 </div>

@@ -15,18 +15,25 @@ from groq import Groq
 sys.path.insert(0, os.path.dirname(__file__))
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional, Dict, Any
 from pathlib import Path
 
 from models.ai_models import PlantAIEngine
 from services.chat_service import ask
 from services.agent_service import list_agents, get_agent_health, run_agent, orchestrate_agents
+from services.digital_simulator_service import (
+    list_simulation_scenarios,
+    calibrate_digital_thresholds,
+    resolve_thresholds,
+    evaluate_row_against_thresholds,
+    map_flagged_signals_to_agents,
+)
 
 load_dotenv()
 
@@ -39,15 +46,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = BASE_DIR / "frontend"
 
 engine: PlantAIEngine = None
+sim_thresholds: Optional[Dict[str, Any]] = None
 
 
 # ── lifespan ────────────────────────────────────────────────
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global engine
+    global engine, sim_thresholds
     print("🚀 Training all AI models on OT/IT/Maintenance data...")
     engine = PlantAIEngine()
+    sim_thresholds = resolve_thresholds(engine=engine, cached_thresholds=None, auto_calibrate=False)
     print("✅ All 7 models ready.")
     yield
 
@@ -103,6 +112,12 @@ class AgentOrchestrateRequest(BaseModel):
     mode: str = "ask"
 
 
+class SimulatorCalibrateRequest(BaseModel):
+    rows: int = Field(default=320, ge=60, le=5000)
+    seed: int = Field(default=42, ge=0, le=1000000)
+    scenario_ids: List[str] = Field(default_factory=list)
+
+
 # ── root ────────────────────────────────────────────────────
 
 @app.get("/")
@@ -129,6 +144,29 @@ async def health() -> dict:
 @app.get("/api/snapshot")
 def get_snapshot():
     return engine.latest_snapshot()
+
+
+@app.get("/api/snapshot/threshold-status")
+def get_snapshot_threshold_status():
+    global sim_thresholds
+    sim_thresholds = resolve_thresholds(
+        engine=engine,
+        cached_thresholds=sim_thresholds,
+        auto_calibrate=True,
+    )
+
+    snapshot = engine.latest_snapshot()
+    threshold_status = (
+        evaluate_row_against_thresholds(snapshot, sim_thresholds)
+        if sim_thresholds
+        else {"overall_status": "normal", "flagged_signals": [], "flagged_count": 0}
+    )
+
+    return {
+        "snapshot": snapshot,
+        "threshold_status": threshold_status,
+        "threshold_generated_at": sim_thresholds.get("generated_at") if sim_thresholds else None,
+    }
 
 
 @app.get("/api/report")
@@ -162,6 +200,59 @@ def get_anomalies():
     ].head(20)
     anomalies["timestamp"] = anomalies["timestamp"].astype(str)
     return anomalies.to_dict("records")
+
+
+@app.get("/api/data/anomalies/threshold-flags")
+def get_anomaly_threshold_flags(limit: int = Query(default=20, ge=1, le=200)):
+    global sim_thresholds
+    sim_thresholds = resolve_thresholds(
+        engine=engine,
+        cached_thresholds=sim_thresholds,
+        auto_calibrate=True,
+    )
+    if not sim_thresholds:
+        raise HTTPException(503, "Thresholds are unavailable. Run simulator calibration first.")
+
+    df = engine.ot_df.copy().tail(limit)
+    anomaly_out = engine.anomaly.predict(df)
+
+    rows = []
+    status_counts = {"normal": 0, "near-threshold": 0, "warning": 0, "critical": 0}
+
+    for idx, (_, row) in enumerate(df.iterrows()):
+        eval_result = evaluate_row_against_thresholds(row.to_dict(), sim_thresholds)
+        status = str(eval_result.get("overall_status", "normal"))
+        status_counts[status] = status_counts.get(status, 0) + 1
+        agent_impacts = {
+            k: v
+            for k, v in map_flagged_signals_to_agents(eval_result.get("flagged_signals", [])).items()
+            if v
+        }
+
+        rows.append(
+            {
+                "timestamp": str(row["timestamp"]),
+                "plant_id": row["plant_id"],
+                "equipment_id": row["equipment_id"],
+                "temperature": float(row["temperature"]),
+                "pressure": float(row["pressure"]),
+                "vibration": float(row["vibration"]),
+                "flow_rate": float(row["flow_rate"]),
+                "power_kw": float(row["power_kw"]),
+                "anomaly_flag": int(anomaly_out["anomaly_flags"][idx]),
+                "anomaly_score": float(anomaly_out["anomaly_scores"][idx]),
+                "threshold_status": status,
+                "flagged_signals": eval_result.get("flagged_signals", []),
+                "agent_impacts": agent_impacts,
+            }
+        )
+
+    return {
+        "threshold_generated_at": sim_thresholds.get("generated_at"),
+        "threshold_rows_used": sim_thresholds.get("rows_used"),
+        "status_counts": status_counts,
+        "rows": rows,
+    }
 
 
 @app.get("/api/data/maintenance")
@@ -219,6 +310,39 @@ def orchestrate_all_agents(req: AgentOrchestrateRequest):
         )
     except KeyError as exc:
         raise HTTPException(404, str(exc)) from exc
+
+
+@app.get("/api/simulator/scenarios")
+def get_simulator_scenarios():
+    return {"scenarios": list_simulation_scenarios()}
+
+
+@app.get("/api/simulator/thresholds")
+def get_simulator_thresholds(auto_calibrate: bool = True):
+    global sim_thresholds
+    sim_thresholds = resolve_thresholds(
+        engine=engine,
+        cached_thresholds=sim_thresholds,
+        auto_calibrate=auto_calibrate,
+    )
+    if not sim_thresholds:
+        raise HTTPException(404, "No calibrated thresholds found.")
+    return sim_thresholds
+
+
+@app.post("/api/simulator/calibrate")
+def calibrate_simulator(req: SimulatorCalibrateRequest):
+    global sim_thresholds
+    try:
+        sim_thresholds = calibrate_digital_thresholds(
+            engine=engine,
+            rows=req.rows,
+            scenario_ids=req.scenario_ids or None,
+            seed=req.seed,
+        )
+        return sim_thresholds
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
 
 
 @app.get("/api/agents/{agent_id}/health")

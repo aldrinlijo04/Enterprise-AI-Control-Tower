@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import {
   PlantSnapshot, PlantReport, AnomalyRow,
   MaintenanceRow, FailureRow,
+  SnapshotThresholdResponse, AnomalyThresholdResponse,
   AgentOrchestrationRequest, AgentOrchestrationResponse,
 } from '../models/plant.models';
 
@@ -17,12 +18,20 @@ export class ApiService {
     return this.http.get<PlantSnapshot>(`${this.base}/api/snapshot`);
   }
 
+  getSnapshotThresholdStatus(): Observable<SnapshotThresholdResponse> {
+    return this.http.get<SnapshotThresholdResponse>(`${this.base}/api/snapshot/threshold-status`);
+  }
+
   getReport(): Observable<PlantReport> {
     return this.http.get<PlantReport>(`${this.base}/api/report`);
   }
 
   getAnomalies(): Observable<AnomalyRow[]> {
     return this.http.get<AnomalyRow[]>(`${this.base}/api/data/anomalies`);
+  }
+
+  getAnomalyThresholdFlags(limit = 20): Observable<AnomalyThresholdResponse> {
+    return this.http.get<AnomalyThresholdResponse>(`${this.base}/api/data/anomalies/threshold-flags?limit=${limit}`);
   }
 
   getMaintenance(): Observable<MaintenanceRow[]> {
