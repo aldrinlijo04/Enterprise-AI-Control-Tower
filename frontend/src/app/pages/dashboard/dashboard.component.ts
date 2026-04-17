@@ -55,6 +55,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   state!: PlantState;
 
   // ── Voice Agent State ──────────────────────────────────────
+<<<<<<< HEAD
+  voiceAgentId = '';
+=======
   isVoiceActive  = false;
   voiceAgentId   = '';
   voiceLoading   = false;
@@ -80,6 +83,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       agentIds: ['energy-optimizer', 'demand-planner'],
     },
   };
+>>>>>>> 4c841c84 (agent briefing)
 
   formatLabel(str: string): string {
     if (!str) return '';
@@ -154,6 +158,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   refresh(): void { this.svc.refresh(); }
 
+<<<<<<< HEAD
+=======
   onBriefingPresetChange(event: Event): void {
     const next = (event.target as HTMLSelectElement).value as BriefingPreset;
     if (next in this.briefingPresetConfig) {
@@ -200,6 +206,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+>>>>>>> 4c841c84 (agent briefing)
   // ── CHART OPTIONS ────────────────────────────────────────────
 
   get forecastChartOpts(): EChartsOption {
