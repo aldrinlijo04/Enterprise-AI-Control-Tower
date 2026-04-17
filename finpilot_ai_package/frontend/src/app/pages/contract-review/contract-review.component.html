@@ -1,0 +1,77 @@
+<section class="page-head">
+  <h1 class="page-title">Contract Review</h1>
+  <p class="page-subtitle">
+    Revenue treatment workspace for shortfall support, clause defensibility, and escalation readiness.
+  </p>
+</section>
+
+<section class="top-bands">
+  <div class="summary-band">
+    <div class="band-label">Summary</div>
+    <div class="band-title">Revenue treatment position</div>
+    <div class="band-copy">
+      {{ response()?.narrative || 'Loading contract review...' }}
+    </div>
+  </div>
+
+  <div class="ai-band">
+    <div class="band-label">AI insights</div>
+    <div class="band-points">
+      <div class="band-point" *ngFor="let point of aiPoints()">{{ point }}</div>
+    </div>
+  </div>
+</section>
+
+<section class="metric-grid">
+  <div class="metric-card">
+    <div class="metric-label">Recognized revenue</div>
+    <div class="metric-value">{{ getValue('recognized_revenue_usd') }}</div>
+    <div class="metric-note">Current supported amount</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Shortfall volume</div>
+    <div class="metric-value">{{ getValue('shortfall_volume_cuft') }}</div>
+    <div class="metric-note">Commercial variance</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Risk level</div>
+    <div class="metric-value">{{ getValue('risk_level') }}</div>
+    <div class="metric-note">Treatment exposure</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Rule applied</div>
+    <div class="metric-value" style="font-size:14px;">{{ getValue('rule_or_clause_used') }}</div>
+    <div class="metric-note">Recognition basis</div>
+  </div>
+</section>
+
+<section class="premium-grid-2" style="margin-top: 8px;">
+  <div style="display:grid;gap:12px;">
+    <section class="chart-card">
+      <div class="section-title">Volume comparison</div>
+      <div class="chart-wrap">
+        <canvas #contractChart></canvas>
+      </div>
+    </section>
+
+    <section class="card" *ngIf="response()">
+      <div class="section-title">Workflow outcome</div>
+      <div class="info-line"><strong>Decision:</strong> {{ response()?.workflow?.decision }}</div>
+      <div class="info-line"><strong>Next action:</strong> {{ response()?.workflow?.next_action }}</div>
+      <div class="info-line"><strong>Threshold:</strong> {{ response()?.workflow?.threshold }}</div>
+
+      <div class="timeline-item" *ngFor="let step of response()?.workflow?.timeline">
+        <div class="timeline-time">{{ step['step'] }}</div>
+        <div class="timeline-text">{{ step['status'] }}</div>
+      </div>
+    </section>
+  </div>
+
+  <app-usecase-chat
+    [module]="'revenue_recognition'"
+    [pageTitle]="'Contract Review'"
+    [contractId]="'TOP-SAMSUNG-001'"
+    [customer]="'Samsung'"
+    [placeholder]="'Ask about clauses, treatment risk, revenue recognition, or audit support...'"
+  ></app-usecase-chat>
+</section>

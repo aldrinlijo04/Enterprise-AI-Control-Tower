@@ -1,0 +1,111 @@
+/* BACKDROP */
+.popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 10, 20, 0.75);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  z-index: 999;
+}
+
+/* POPUP BOX */
+.popup-box {
+  width: 340px;
+  padding: 22px;
+  border-radius: 14px;
+
+  background: linear-gradient(180deg, #0f1b32 0%, #0b1426 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+
+  color: #f1f5f9;
+}
+
+/* TITLE */
+.popup-box h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+/* TEXT */
+.popup-box p {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #b5c2d3;
+  line-height: 1.6;
+}
+
+.popup-box strong {
+  color: #22c55e;
+}
+
+/* ACTION BUTTONS */
+.popup-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* CANCEL */
+.cancel {
+  background: rgba(255,255,255,0.08);
+  color: #dbe7f3;
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.cancel:hover {
+  background: rgba(255,255,255,0.14);
+}
+
+/* CONFIRM */
+.confirm {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #04130a;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.15s ease;
+  box-shadow: 0 10px 18px rgba(34,197,94,0.25);
+}
+
+.confirm:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+/* 🔥 OPTIONAL: COLOR BUTTONS IN TABLE */
+
+.approve-btn {
+  background: rgba(34, 197, 94, 0.18);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.reject-btn {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.escalate-btn {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 6px 10px;
+  border-radius: 6px;
+}

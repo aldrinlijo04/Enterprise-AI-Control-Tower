@@ -1,0 +1,43 @@
+.chart-wrap {
+  height: 220px;
+  position: relative;
+}
+
+.workflow-outcome-card {
+  padding: 18px;
+}
+
+.workflow-kv {
+  display: grid;
+  gap: 8px;
+  color: #d8e5f2;
+  font-size: 14px;
+  line-height: 1.7;
+  margin-top: 4px;
+}
+
+.workflow-timeline {
+  margin-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.workflow-row {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.workflow-step {
+  color: #7f97b4;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.workflow-status {
+  color: #eef4fb;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: lowercase;
+}

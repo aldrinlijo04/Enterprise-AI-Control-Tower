@@ -1,0 +1,77 @@
+<section class="page-head">
+  <h1 class="page-title">Capital Decision</h1>
+  <p class="page-subtitle">
+    Executive capital allocation view for scenario quality, investment exposure, and approval recommendation.
+  </p>
+</section>
+
+<section class="top-bands">
+  <div class="summary-band">
+    <div class="band-label">Summary</div>
+    <div class="band-title">Investment recommendation</div>
+    <div class="band-copy">
+      {{ response()?.narrative || 'Loading capital recommendation...' }}
+    </div>
+  </div>
+
+  <div class="ai-band">
+    <div class="band-label">AI insights</div>
+    <div class="band-points">
+      <div class="band-point" *ngFor="let point of aiPoints()">{{ point }}</div>
+    </div>
+  </div>
+</section>
+
+<section class="metric-grid">
+  <div class="metric-card">
+    <div class="metric-label">IRR</div>
+    <div class="metric-value">{{ getValue('irr_pct') }}</div>
+    <div class="metric-note">Return quality</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">NPV</div>
+    <div class="metric-value">{{ getValue('npv_usd') }}</div>
+    <div class="metric-note">Portfolio value impact</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Cash proxy</div>
+    <div class="metric-value">{{ getValue('annual_cashflow_proxy_usd') }}</div>
+    <div class="metric-note">Annual value signal</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Recommendation</div>
+    <div class="metric-value" style="font-size:14px;">{{ getValue('recommendation') }}</div>
+    <div class="metric-note">Decision output</div>
+  </div>
+</section>
+
+<section class="premium-grid-2" style="margin-top: 12px;">
+  <div style="display:grid;gap:12px;">
+    <section class="chart-card">
+      <div class="section-title">Scenario view</div>
+      <div class="chart-wrap">
+        <canvas #capitalChart></canvas>
+      </div>
+    </section>
+
+    <section class="card" *ngIf="response()">
+      <div class="section-title">Workflow outcome</div>
+      <div class="info-line"><strong>Decision:</strong> {{ response()?.workflow?.decision }}</div>
+      <div class="info-line"><strong>Next action:</strong> {{ response()?.workflow?.next_action }}</div>
+      <div class="info-line"><strong>Threshold:</strong> {{ response()?.workflow?.threshold }}</div>
+
+      <div class="timeline-item" *ngFor="let step of response()?.workflow?.timeline">
+        <div class="timeline-time">{{ step['step'] }}</div>
+        <div class="timeline-text">{{ step['status'] }}</div>
+      </div>
+    </section>
+  </div>
+
+  <app-usecase-chat
+    [module]="'capital_allocation'"
+    [pageTitle]="'Capital Decision'"
+    [projectId]="'PRJ-0001'"
+    [scenario]="scenario"
+    [placeholder]="'Ask about IRR, NPV, scenario assumptions, risk, or recommendation...'"
+  ></app-usecase-chat>
+</section>

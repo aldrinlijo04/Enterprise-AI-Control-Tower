@@ -1,0 +1,39 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="brand-panel">
+        <div class="brand-mark">FP</div>
+        <div>
+          <div class="brand">FinPilot AI</div>
+          <div class="subtitle">Operational Intelligence Desk</div>
+        </div>
+      </div>
+
+      <div class="scope-box">
+        <div class="scope-label">Active project</div>
+        <div class="scope-value">{{ currentProject() }}</div>
+        <div class="scope-text">
+          Every dashboard, agent, approval, exception, and workflow view is tied to the selected project.
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a
+          *ngFor="let item of navItems"
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="nav-link"
+        >
+          <span class="nav-icon">{{ item.icon }}</span>
+          <span>{{ item.label }}</span>
+        </a>
+      </nav>
+    </div>
+  </aside>
+
+  <main class="content-shell">
+    <div class="content-scroll">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

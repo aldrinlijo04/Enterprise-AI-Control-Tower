@@ -1,0 +1,88 @@
+<section class="page-head summary-banner">
+  <div>
+    <div class="eyebrow">Close readiness control</div>
+    <h1 class="page-title">Close Status</h1>
+    <p class="page-subtitle">
+      Month-end close posture, exception mix, and workflow decision for {{ selectedProjectId() }}.
+    </p>
+  </div>
+  <div class="summary-chip">Project-scoped close analysis</div>
+</section>
+
+<section class="top-bands">
+  <div class="summary-band">
+    <div class="band-label">Close summary</div>
+    <div class="band-title">Current close readiness</div>
+    <div class="band-copy">
+      {{ response()?.narrative || 'Loading close readiness analysis...' }}
+    </div>
+  </div>
+
+  <div class="ai-band">
+    <div class="band-label">AI insight</div>
+    <div class="band-points">
+      <div class="band-point" *ngFor="let point of aiPoints()">{{ point }}</div>
+    </div>
+  </div>
+</section>
+
+<section class="metric-grid" style="margin-top: 14px;">
+  <div class="metric-card">
+    <div class="metric-label">Manual review</div>
+    <div class="metric-value">{{ getMetric('manual_review_candidates') }}</div>
+    <div class="metric-note">Needs controller attention</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label">Auto post</div>
+    <div class="metric-value">{{ getMetric('auto_post_candidates') }}</div>
+    <div class="metric-note">Low-friction close items</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label">Flagged</div>
+    <div class="metric-value">{{ getMetric('flagged_count') }}</div>
+    <div class="metric-note">Potential control risk</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label">Open</div>
+    <div class="metric-value">{{ getMetric('open_count') }}</div>
+    <div class="metric-note">Backlog before sign-off</div>
+  </div>
+</section>
+
+<section class="premium-grid-2" style="margin-top: 8px;">
+  <div style="display:grid; gap:12px;">
+    <section class="card chart-card">
+      <div class="section-title">Portfolio close mix</div>
+      <div class="chart-wrap">
+        <canvas #closeChart></canvas>
+      </div>
+    </section>
+
+    <section class="card workflow-outcome-card">
+      <div class="section-title">Workflow outcome</div>
+
+      <div class="workflow-kv">
+        <div><strong>Decision:</strong> {{ workflowDecision() }}</div>
+        <div><strong>Next action:</strong> {{ workflowNextAction() }}</div>
+        <div><strong>Threshold:</strong> {{ workflowThreshold() }}</div>
+      </div>
+
+      <div class="workflow-timeline" *ngIf="workflowTimeline().length">
+        <div class="workflow-row" *ngFor="let step of workflowTimeline()">
+          <div class="workflow-step">{{ step['step'] }}</div>
+          <div class="workflow-status">{{ step['status'] }}</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <app-usecase-chat
+    [module]="'financial_close'"
+    [pageTitle]="'Close Status'"
+    [placeholder]="'Ask about the selected project...'"
+    [scenario]="{ selected_project_id: selectedProjectId() }"
+  ></app-usecase-chat>
+</section>

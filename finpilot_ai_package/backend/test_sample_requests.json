@@ -1,0 +1,39 @@
+{
+  "financial_close": {
+    "query": "Run month-end close for AirProd Malaysia and summarize exceptions",
+    "requested_module": "financial_close",
+    "entity": "AirProd Malaysia",
+    "user_role": "controller",
+    "scenario": {},
+    "use_llm_summary": true
+  },
+  "poc_accounting": {
+    "query": "Estimate remaining cost for NEOM Phase 2",
+    "requested_module": "poc_accounting",
+    "project_id": "NEOM Phase 2",
+    "user_role": "project_controller",
+    "scenario": {},
+    "use_llm_summary": true
+  },
+  "revenue_recognition": {
+    "query": "Review Samsung take-or-pay shortfall revenue recognition",
+    "requested_module": "revenue_recognition",
+    "contract_id": "TOP-SAMSUNG-001",
+    "customer": "Samsung",
+    "user_role": "revenue_accountant",
+    "scenario": {},
+    "use_llm_summary": true
+  },
+  "capital_allocation": {
+    "query": "Compare NEOM Phase 2 under carbon price 120",
+    "requested_module": "capital_allocation",
+    "project_id": "NEOM Phase 2",
+    "user_role": "cfo",
+    "scenario": {
+      "carbon_price": 120,
+      "tax_credit_passes": true,
+      "capex": 800000000
+    },
+    "use_llm_summary": true
+  }
+}

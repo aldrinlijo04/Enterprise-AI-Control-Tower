@@ -1,0 +1,53 @@
+
+<section class="page-head summary-banner">
+  <div>
+    <div class="eyebrow">Human in the loop</div>
+    <h1 class="page-title">Approval Queue</h1>
+    <p class="page-subtitle">Review medium and high-risk workflow outcomes before finance action is executed.</p>
+  </div>
+  <div class="summary-chip">Controller action layer</div>
+</section>
+
+<section class="panel" style="margin-top: 14px;">
+  <div class="toolbar-row">
+    <input class="input" [(ngModel)]="actor" placeholder="Actor name" />
+    <input class="input" [(ngModel)]="comment" placeholder="Decision comment" />
+  </div>
+</section>
+
+<section class="table-card" style="margin-top: 14px;">
+  <div class="table-head" style="grid-template-columns: 90px 1fr 1fr 1.2fr 120px 90px 90px 230px;">
+    <div>ID</div><div>Module</div><div>Owner</div><div>Action</div><div>Amount</div><div>Risk</div><div>Status</div><div>Controls</div>
+  </div>
+
+  <div class="table-row" style="grid-template-columns: 90px 1fr 1fr 1.2fr 120px 90px 90px 230px;" *ngFor="let item of items()">
+    <div>{{ item.approval_id }}</div>
+    <div>{{ item.module }}</div>
+    <div>{{ item.recommended_owner }}</div>
+    <div>{{ item.recommended_action }}</div>
+    <div>{{ (item.amount_usd / 1000000).toFixed(1) }}M USD</div>
+    <div><span class="pill" [ngClass]="item.risk_level">{{ item.risk_level }}</span></div>
+    <div>{{ item.status }}</div>
+    <div class="toolbar-row">
+   <button class="approve-btn" (click)="openPopup(item, 'approve')">Approve</button>
+   <button class="reject-btn" (click)="openPopup(item, 'reject')">Reject</button>
+   <button class="escalate-btn" (click)="openPopup(item, 'escalate')">Escalate</button>
+    </div>
+  </div>
+</section>
+<!-- SIMPLE POPUP -->
+<div class="popup-backdrop" *ngIf="showPopup">
+  <div class="popup-box">
+    <h3>Confirm</h3>
+
+    <p>
+      Are you sure you want to
+      <strong>{{ popupAction.toUpperCase() }}</strong> this item?
+    </p>
+
+    <div class="popup-actions">
+      <button class="cancel" (click)="closePopup()">Cancel</button>
+      <button class="confirm" (click)="confirmAction()">Yes</button>
+    </div>
+  </div>
+</div>

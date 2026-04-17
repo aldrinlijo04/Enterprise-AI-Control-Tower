@@ -1,0 +1,247 @@
+<section class="scope-toolbar">
+  <div>
+    <h1 class="page-title">Enterprise Finance Overview</h1>
+    <p class="page-subtitle">
+      Industrial finance control room for project-level monitoring, workflow routing, and agent-backed decisions.
+    </p>
+  </div>
+
+  <div class="scope-box">
+    <div class="scope-label">Project scope</div>
+    <select
+      class="select"
+      [ngModel]="selectedProjectId()"
+      (ngModelChange)="onProjectChange($event)"
+    >
+      <option *ngFor="let project of projects()" [ngValue]="project.project_id">
+        {{ project.project_id }} · {{ project.project_name }}
+      </option>
+    </select>
+  </div>
+</section>
+
+<section class="top-bands">
+  <div class="summary-band">
+    <div class="band-label">Executive summary</div>
+    <div class="band-title">
+      {{ selectedProject()?.project_name || 'Portfolio view' }}
+    </div>
+    <div class="band-copy">
+      {{ topSummary() }}
+    </div>
+  </div>
+
+  <div class="ai-band">
+    <div class="band-label">AI insight</div>
+    <div class="band-points">
+      <div class="band-point" *ngFor="let point of aiInsights()">
+        {{ point }}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="overview-grid">
+
+  <div class="overview-left">
+
+    <section class="portfolio-card overview-profile-card">
+      <div class="section-title">Project profile</div>
+
+      <div *ngIf="selectedProject() as p">
+        <div class="table-head profile-head">
+          <div>Project</div>
+          <div>Region</div>
+          <div>Controller</div>
+          <div>Status</div>
+          <div>Risk</div>
+        </div>
+
+        <div class="table-row profile-row">
+          <div>{{ p.project_name }}</div>
+          <div>{{ p.region }}</div>
+          <div>{{ p.project_controller }}</div>
+          <div>{{ p.status }}</div>
+          <div>
+            <span class="pill" [class]="riskClass(p.risk_level)">
+              {{ p.risk_level }}
+            </span>
+          </div>
+        </div>
+
+        <div class="profile-compact-grid">
+          <div class="profile-item">
+            <span class="profile-label">Country</span>
+            <span class="profile-value">{{ p.country }}</span>
+          </div>
+
+          <div class="profile-item">
+            <span class="profile-label">Business Unit</span>
+            <span class="profile-value">{{ p.business_unit }}</span>
+          </div>
+
+          <div class="profile-item">
+            <span class="profile-label">CapEx</span>
+            <span class="profile-value">{{ formatMoney(p.capex_usd) }}</span>
+          </div>
+
+          <div class="profile-item">
+            <span class="profile-label">Completion</span>
+            <span class="profile-value">{{ p.completion_pct }}%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="compact-links">
+      <a class="nav-card compact-nav-card" *ngFor="let item of quickLinks" [routerLink]="item.route">
+        <div class="nav-title">{{ item.title }}</div>
+        <div class="nav-text">{{ item.text }}</div>
+      </a>
+    </section>
+
+    <section class="card overview-snapshot-card" *ngIf="selectedProject() as p">
+      <div class="section-title">Operational snapshot</div>
+
+      <div class="snapshot-grid">
+        <div class="snapshot-block">
+          <div class="snapshot-label">Overview agent</div>
+          <div class="snapshot-text">
+            Monitoring execution pressure, workflow movement, and control follow-up for {{ p.project_name }}.
+          </div>
+        </div>
+
+        <div class="snapshot-block">
+          <div class="snapshot-label">Current posture</div>
+          <div class="snapshot-text">
+            Project is {{ p.status }} with {{ p.delay_days }} days delay and {{ p.forecast_variance_pct }}% forecast variance.
+          </div>
+        </div>
+
+        <div class="snapshot-block">
+          <div class="snapshot-label">Control watch</div>
+          <div class="snapshot-text">
+            {{ p.risk_level | titlecase }} risk profile under {{ p.project_controller }}. Downstream review should focus on close, estimate, and capital movement.
+          </div>
+        </div>
+
+        <div class="snapshot-block">
+          <div class="snapshot-label">Suggested next step</div>
+          <div class="snapshot-text">
+            Move into Close Status for execution readiness, or Project Estimate if forecast pressure needs immediate validation.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card plant-panel-card">
+      <div class="section-title">{{ plantPanel().title }}</div>
+
+      <div class="plant-panel-location">
+        {{ plantPanel().location }}
+      </div>
+
+      <div class="plant-kpi-grid">
+        <div class="plant-kpi-box">
+          <div class="plant-kpi-label">Uptime</div>
+          <div class="plant-kpi-value">{{ plantPanel().uptime }}</div>
+          <div class="plant-kpi-note">Operational availability</div>
+        </div>
+
+        <div class="plant-kpi-box">
+          <div class="plant-kpi-label">Efficiency</div>
+          <div class="plant-kpi-value">{{ plantPanel().efficiency }}</div>
+          <div class="plant-kpi-note">Execution efficiency</div>
+        </div>
+
+        <div class="plant-kpi-box">
+          <div class="plant-kpi-label">Anomalies</div>
+          <div class="plant-kpi-value">{{ plantPanel().anomalies }}</div>
+          <div class="plant-kpi-note">Open exceptions</div>
+        </div>
+
+        <div class="plant-kpi-box">
+          <div class="plant-kpi-label">Approvals</div>
+          <div class="plant-kpi-value">{{ plantPanel().approvals }}</div>
+          <div class="plant-kpi-note">Pending decisions</div>
+        </div>
+
+        <div class="plant-kpi-box">
+          <div class="plant-kpi-label">Workflow</div>
+          <div class="plant-kpi-value">{{ plantPanel().workflow }}</div>
+          <div class="plant-kpi-note">Recent live events</div>
+        </div>
+
+        <div class="plant-kpi-box">
+          <div class="plant-kpi-label">Risk level</div>
+          <div class="plant-kpi-value">{{ plantPanel().risk }}</div>
+          <div class="plant-kpi-note">Current posture</div>
+        </div>
+      </div>
+
+      <div class="plant-next-action">
+        <div class="snapshot-label">Agent-guided next step</div>
+        <div class="snapshot-text">
+          {{ plantPanel().nextAction }}
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="right-rail">
+
+    <section class="activity-card">
+      <div class="section-title">Real-time activities</div>
+
+      <div class="activity-item" *ngFor="let ev of workflowEvents()">
+        <div class="activity-top">
+          <div>{{ ev['module'] || 'workflow' }}</div>
+          <div>{{ ev['timestamp'] || 'now' }}</div>
+        </div>
+
+        <div class="activity-title">
+          {{ ev['next_action'] || ev['decision'] || 'Finance workflow update' }}
+        </div>
+
+        <div class="activity-copy">
+          Agent routing and decision tracking active across workflow.
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!workflowEvents().length">
+        No recent workflow activity available for the current scope.
+      </div>
+    </section>
+
+    <section class="message-card">
+      <div class="section-title">Real-time messages</div>
+
+      <div class="message-item">
+        <div class="message-top">
+          <div>{{ selectedProject()?.project_controller || 'Controller Desk' }}</div>
+          <div>Ops stream</div>
+        </div>
+
+        <div class="message-title">Project scope active</div>
+        <div class="message-copy">
+          {{ selectedProject()?.project_name || 'Selected project' }} is driving current downstream analysis and agent decisions.
+        </div>
+      </div>
+
+      <div class="message-item" *ngIf="selectedProject() as p">
+        <div class="message-top">
+          <div>Risk monitor</div>
+          <div>{{ p.risk_level | titlecase }}</div>
+        </div>
+
+        <div class="message-title">Execution pressure check</div>
+        <div class="message-copy">
+          Delay at {{ p.delay_days }} days with {{ p.forecast_variance_pct }}% variance indicates downstream review needed.
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+</section>

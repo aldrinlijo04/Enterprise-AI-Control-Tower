@@ -1,0 +1,22 @@
+
+<section class="page-head summary-banner">
+  <div>
+    <div class="eyebrow">Exception pressure</div>
+    <h1 class="page-title">Exception Board</h1>
+    <p class="page-subtitle">Open exception signals across {{ projectContext.projectDisplay() }} ordered for operational follow-up.</p>
+  </div>
+  <div class="summary-chip">Priority ordered</div>
+</section>
+
+<section class="premium-grid-3" style="margin-top: 14px;">
+  <div class="card" *ngFor="let item of items()">
+    <div class="toolbar-row" style="justify-content: space-between; align-items: center;">
+      <strong>{{ item['issue_id'] }}</strong>
+      <span class="pill" [ngClass]="severityClass(item)">{{ item['severity'] }}</span>
+    </div>
+    <div class="info-line" style="margin-top: 12px;">{{ item['description'] }}</div>
+    <div class="info-line">Module: {{ item['module'] }}</div>
+    <div class="info-line">Action: {{ item['recommended_action'] }}</div>
+    <div class="info-line">Project: {{ item['project_id'] || 'Portfolio' }}</div>
+  </div>
+</section>

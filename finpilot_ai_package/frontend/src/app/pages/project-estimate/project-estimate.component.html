@@ -1,0 +1,76 @@
+<section class="page-head">
+  <h1 class="page-title">Project Estimate</h1>
+  <p class="page-subtitle">
+    Estimate control view for cost-to-complete, overrun drivers, and remediation-focused actioning.
+  </p>
+</section>
+
+<section class="top-bands">
+  <div class="summary-band">
+    <div class="band-label">Summary</div>
+    <div class="band-title">Cost-to-complete position</div>
+    <div class="band-copy">
+      {{ response()?.narrative || 'Loading estimate summary...' }}
+    </div>
+  </div>
+
+  <div class="ai-band">
+    <div class="band-label">AI insights</div>
+    <div class="band-points">
+      <div class="band-point" *ngFor="let point of aiPoints()">{{ point }}</div>
+    </div>
+  </div>
+</section>
+
+<section class="metric-grid">
+  <div class="metric-card">
+    <div class="metric-label">Remaining estimate</div>
+    <div class="metric-value">{{ getValue('remaining_estimate_usd') }}</div>
+    <div class="metric-note">Current cost-to-complete</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Procurement impact</div>
+    <div class="metric-value">{{ getValue('procurement_impact_usd') }}</div>
+    <div class="metric-note">Supply-side pressure</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Market impact</div>
+    <div class="metric-value">{{ getValue('market_impact_usd') }}</div>
+    <div class="metric-note">External cost exposure</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Risk level</div>
+    <div class="metric-value">{{ getValue('risk_level') }}</div>
+    <div class="metric-note">Estimate confidence</div>
+  </div>
+</section>
+
+<section class="premium-grid-2" style="margin-top: 12px;">
+  <div style="display:grid;gap:12px;">
+    <section class="chart-card">
+      <div class="section-title">Estimate drivers</div>
+      <div class="chart-wrap">
+        <canvas #estimateChart></canvas>
+      </div>
+    </section>
+
+    <section class="card" *ngIf="response()">
+      <div class="section-title">Workflow outcome</div>
+      <div class="info-line"><strong>Decision:</strong> {{ response()?.workflow?.decision }}</div>
+      <div class="info-line"><strong>Next action:</strong> {{ response()?.workflow?.next_action }}</div>
+      <div class="info-line"><strong>Threshold:</strong> {{ response()?.workflow?.threshold }}</div>
+
+      <div class="timeline-item" *ngFor="let step of response()?.workflow?.timeline">
+        <div class="timeline-time">{{ step['step'] }}</div>
+        <div class="timeline-text">{{ step['status'] }}</div>
+      </div>
+    </section>
+  </div>
+
+  <app-usecase-chat
+    [module]="'poc_accounting'"
+    [pageTitle]="'Project Estimate'"
+    [projectId]="'PRJ-0001'"
+    [placeholder]="'Ask about estimate drivers, overruns, remaining cost, or confidence...'"
+  ></app-usecase-chat>
+</section>

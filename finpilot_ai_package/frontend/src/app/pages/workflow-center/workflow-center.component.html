@@ -1,0 +1,38 @@
+
+<section class="page-head summary-banner">
+  <div>
+    <div class="eyebrow">Live operating layer</div>
+    <h1 class="page-title">Workflow Center</h1>
+    <p class="page-subtitle">Action routing, priority order, and workflow execution history for {{ projectContext.projectDisplay() }}.</p>
+  </div>
+  <div class="summary-chip">Operational stream</div>
+</section>
+
+<section class="metric-grid" style="margin-top: 14px;">
+  <div class="metric-card"><div class="metric-label">Pending approvals</div><div class="metric-value">{{ summary()?.pending_approvals || 0 }}</div><div class="metric-note">Human-in-the-loop queue</div></div>
+  <div class="metric-card"><div class="metric-label">Projects</div><div class="metric-value">{{ summary()?.counts?.['projects'] || 0 }}</div><div class="metric-note">Portfolio scope</div></div>
+  <div class="metric-card"><div class="metric-label">Transactions</div><div class="metric-value">{{ summary()?.counts?.['transactions'] || 0 }}</div><div class="metric-note">Finance events</div></div>
+  <div class="metric-card"><div class="metric-label">Pending issues</div><div class="metric-value">{{ summary()?.counts?.['pending_issues'] || 0 }}</div><div class="metric-note">Requires action ordering</div></div>
+</section>
+
+<section class="premium-grid-2" style="margin-top: 14px;">
+  <div class="card">
+    <h2 class="section-title">Issue action order</h2>
+    <div class="table-head" style="grid-template-columns: 100px 1fr 1.3fr 70px;">
+      <div>ID</div><div>Module</div><div>Recommended action</div><div>Rank</div>
+    </div>
+    <div class="table-row" style="grid-template-columns: 100px 1fr 1.3fr 70px;" *ngFor="let item of summary()?.top_issue_actions">
+      <div>{{ item['issue_id'] }}</div><div>{{ item['module'] }}</div><div>{{ item['recommended_action'] }}</div><div>P{{ item['action_priority'] }}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Workflow timeline</h2>
+    <div class="timeline-list">
+      <div class="timeline-item" *ngFor="let ev of summary()?.recent_workflow_events">
+        <div class="timeline-time">{{ ev['timestamp'] }}</div>
+        <div class="timeline-text">{{ ev['module'] }} · {{ ev['decision'] || 'decision' }} · {{ ev['next_action'] || 'action pending' }}</div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,50 @@
+<div class="chat-card">
+  <div class="chat-head">
+    <div>
+      <div class="chat-title">Module Chat</div>
+      <div class="chat-subhead">
+        Scope · {{ selectedProjectId() || 'No project selected' }}
+      </div>
+    </div>
+
+    <div class="chat-status" [class.loading]="loading()">
+      {{ loading() ? 'Thinking...' : 'Ready' }}
+    </div>
+  </div>
+
+  <div class="chat-stream" #chatStream>
+    <div
+      class="msg"
+      *ngFor="let msg of messages()"
+      [class.user]="msg.role === 'user'"
+      [class.assistant]="msg.role === 'assistant'"
+    >
+      <div class="msg-role">
+        {{ msg.role === 'user' ? 'You' : 'FinPilot AI' }}
+      </div>
+      <div class="msg-text">{{ msg.text }}</div>
+    </div>
+
+    <div class="typing-row" *ngIf="loading()">
+      <div class="typing-pill">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input-wrap">
+    <textarea
+      [(ngModel)]="userInput"
+      rows="3"
+      [placeholder]="placeholder"
+      (keydown)="onKeyDown($event)"
+    ></textarea>
+
+    <div class="chat-actions">
+      <div class="chat-hint">Enter to send · Shift + Enter for new line</div>
+      <button (click)="sendMessage()" [disabled]="loading() || !userInput.trim()">
+        {{ loading() ? 'Sending...' : 'Send Message' }}
+      </button>
+    </div>
+  </div>
+</div>
