@@ -9,6 +9,11 @@
         </div>
       </div>
 
+      <button type="button" class="return-link" (click)="backToControlTower()">
+        <span class="return-arrow">←</span>
+        <span>Back to Control Tower</span>
+      </button>
+
       <div class="scope-box">
         <div class="scope-label">Active project</div>
         <div class="scope-value">{{ currentProject() }}</div>

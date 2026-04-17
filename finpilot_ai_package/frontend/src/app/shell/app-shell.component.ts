@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ProjectContextService } from '../services/project-context.service';
 
+const runtimeEnv = (window as Window & { __env?: Record<string, string> }).__env;
+
 @Component({
   selector: 'app-shell',
   standalone: true,
@@ -12,6 +14,7 @@ import { ProjectContextService } from '../services/project-context.service';
 })
 export class AppShellComponent {
   private projectContext = inject(ProjectContextService);
+  readonly controlTowerUrl = (runtimeEnv?.['CONTROL_TOWER_URL'] || 'http://localhost:4200').replace(/\/$/, '');
 
   currentProject = computed(() => this.projectContext.projectDisplay());
 
@@ -25,4 +28,8 @@ export class AppShellComponent {
     { label: 'Project Estimate', route: '/project-estimate', icon: '▦' },
     { label: 'Capital Decision', route: '/capital-decision', icon: '⬢' }
   ];
+
+  backToControlTower(): void {
+    window.location.href = `${this.controlTowerUrl}/`;
+  }
 }

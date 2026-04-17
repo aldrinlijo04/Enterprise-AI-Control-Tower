@@ -69,6 +69,35 @@
   line-height: 1.45;
 }
 
+.return-link {
+  width: 100%;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(59, 130, 246, 0.26);
+  background: rgba(59, 130, 246, 0.1);
+  color: #dceeff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  margin-bottom: 14px;
+}
+
+.return-link:hover {
+  background: rgba(59, 130, 246, 0.16);
+  border-color: rgba(59, 130, 246, 0.36);
+  transform: translateY(-1px);
+}
+
+.return-arrow {
+  font-size: 14px;
+  line-height: 1;
+}
+
 .scope-box {
   margin-bottom: 18px;
   padding: 14px 14px 15px;
