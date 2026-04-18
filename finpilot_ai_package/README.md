@@ -63,6 +63,24 @@ Default sidecar frontend URL: `http://localhost:4300`
 
 The frontend reads `window.__env.FINPILOT_API_URL` when present; otherwise it uses `http://localhost:8010/api`.
 
+## ElevenLabs voice setup (FinPilot)
+
+FinPilot voice uses the same environment-driven pattern as the main AIR OS app.
+
+Add these keys in `finpilot_ai_package/backend/.env`:
+
+```env
+ELEVENLABS_API_KEY=your_elevenlabs_api_key
+ELEVENLABS_AGENT_ID=your_elevenlabs_agent_id
+```
+
+To switch to a different ElevenLabs agent later, only update `ELEVENLABS_AGENT_ID` and restart the FinPilot backend.
+
+FinPilot exposes:
+
+- `GET /api/voice/config` (frontend reads the active `agent_id`)
+- `GET /api/voice/signed-url` (returns a secure signed conversation URL)
+
 ## LLM provider settings
 
 ### Mock

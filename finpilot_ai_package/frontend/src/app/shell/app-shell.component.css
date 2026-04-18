@@ -195,6 +195,13 @@
   height: 0;
 }
 
+.elevenlabs-widget-anchor {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 10000;
+}
+
 @media (max-width: 1180px) {
   .shell {
     grid-template-columns: 290px minmax(0, 1fr);
@@ -233,5 +240,10 @@
   .content-scroll {
     height: auto;
     overflow: visible;
+  }
+
+  .elevenlabs-widget-anchor {
+    right: 12px;
+    bottom: 12px;
   }
 }

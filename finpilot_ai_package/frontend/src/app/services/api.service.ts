@@ -10,6 +10,11 @@ import {
 
 const runtimeEnv = (window as Window & { __env?: Record<string, string> }).__env;
 
+export interface VoiceConfigResponse {
+  agent_id: string;
+  has_api_key: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
@@ -63,5 +68,9 @@ export class ApiService {
     }
 
     return this.http.get<any>(url);
+  }
+
+  getVoiceConfig() {
+    return this.http.get<VoiceConfigResponse>(`${this.baseUrl}/voice/config`);
   }
 }

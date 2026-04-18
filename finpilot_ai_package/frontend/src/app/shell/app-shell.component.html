@@ -42,3 +42,9 @@
     </div>
   </main>
 </div>
+
+<elevenlabs-convai
+  *ngIf="voiceAgentId"
+  [attr.agent-id]="voiceAgentId"
+  class="elevenlabs-widget-anchor">
+</elevenlabs-convai>

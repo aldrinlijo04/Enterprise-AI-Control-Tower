@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import httpx
 from fastapi import APIRouter, HTTPException
 
+from app.core.config import settings
 from app.models.schemas import (
     AgentRunRequest,
     AgentRunResponse,
@@ -216,3 +218,44 @@ def exceptions(module: str | None = None, status: str | None = None, limit: int 
 def issue_action_board(limit: int = 25):
     runtime = get_runtime()
     return {"items": runtime.repo.get_issue_action_board(limit=limit)}
+
+
+@router.get("/voice/config")
+def voice_config():
+    return {
+        "agent_id": settings.elevenlabs_agent_id or "",
+        "has_api_key": bool(settings.elevenlabs_api_key),
+    }
+
+
+@router.get("/voice/signed-url")
+async def voice_signed_url():
+    if not settings.elevenlabs_api_key:
+        raise HTTPException(status_code=400, detail="Missing ELEVENLABS_API_KEY in environment.")
+    if not settings.elevenlabs_agent_id:
+        raise HTTPException(status_code=400, detail="Missing ELEVENLABS_AGENT_ID in environment.")
+
+    api_url = "https://api.elevenlabs.io/v1/convai/conversation/get_signed_url"
+
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            response = await client.get(
+                api_url,
+                params={"agent_id": settings.elevenlabs_agent_id},
+                headers={"xi-api-key": settings.elevenlabs_api_key},
+            )
+            response.raise_for_status()
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(
+            status_code=exc.response.status_code,
+            detail=f"ElevenLabs API error: {exc.response.text}",
+        ) from exc
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail=f"Failed to contact ElevenLabs: {exc}") from exc
+
+    payload = response.json()
+    signed_url = payload.get("signed_url")
+    if not signed_url:
+        raise HTTPException(status_code=502, detail="No signed_url returned by ElevenLabs.")
+
+    return {"signed_url": signed_url}

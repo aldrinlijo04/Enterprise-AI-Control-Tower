@@ -9,8 +9,8 @@ import { CommonModule } from '@angular/common';
     <div class="splash">
       <div class="splash-inner">
         <div class="splash-logo">
-          <span class="logo-aria">ARIA</span>
-          <span class="logo-sub">Advanced Real-time Industrial AI</span>
+          <span class="logo-aria">AIRA</span>
+          <span class="logo-sub">Advanced Real-time AIR OS</span>
         </div>
         <div class="splash-bars">
           <div *ngFor="let i of bars; let idx = index"
